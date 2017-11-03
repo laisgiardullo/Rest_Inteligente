@@ -76,9 +76,9 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
         #for pt in (novos_pts):
         #    print (pt[0][0])
-        for y in range (len(novos_pts)):
+        for ponto in range (len(novos_pts)):
             try:
-                if((abs(cx-(novos_pts[0][0][y]))<new_width) or (abs(cy-(novos_pts[1][0][y]))<h)):
+                if((abs(cx-(novos_pts[ponto][0][0]))<new_width) or (abs(cy-(novos_pts[ponto][0][1]))<h)):
                     novo = False
             except:
                 pass
@@ -93,7 +93,15 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             lista_cx.append([cx])
             lista_cy.append([cy])
             print("novospts:"+str(novos_pts))
-            np.append(novos_pts,(cx,cy))
+            print ("cx e cy"+str(cx)+str(cy))
+            pa = np.array ([[cx]])
+            pb = np.array ([[cy]])
+            nv_pt = np.dstack((pa,pb))
+            nv_pt = nv_pt.astype(np.float32)
+
+            if (novos_pts !=[]):
+                novos_pts = np.append(novos_pts,nv_pt, axis = 0)
+            else: novos_pts = nv_pt
     return (persons, pid, lista_cx, lista_cy, novos_pts)
 
 

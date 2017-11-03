@@ -40,19 +40,18 @@ elif (tipo ==2):
     b=np.array([]) #todos y na ordem
     #p0 = [[[468,217]], [[744,211]], [[660,198]], [[692,182]], [[139,121]]]
     #p0 = np.ndarray((len(p0), 2), buffer=np.array(p0), dtype=np.float32)
-    novos_pts = np.dstack((a,b))
-    novos_pts = novos_pts.astype(np.float32)
+    novos_pts = []
+    #novos_pts = np.dstack((a,b))
+    #novos_pts = novos_pts.astype(np.float32) #mudar tipo de objetos do array para float32
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
         tempo_video = cap.get(0)
-        #frame2 = Cascade1(frame)
-        #frame2 = Countours (frame, fgbg)
         frame2, persons, pid, lista_cx, lista_cy, novos_pts = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, lista_cx, lista_cy, novos_pts)
         #frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid, old_frame,p0 = Countours_Area_Seguir(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, old_frame,p0, p1)
-        if(novos_pts!=[]):
-            novos_pts = novos_pts.reshape(-1,1,2)
+        #if(novos_pts!=[]):
+        #    novos_pts = novos_pts.reshape(-1,1,2)
         #p0 = np.dstack((lista_cx,lista_cy))
         #p0 = p0.astype(np.float32)
         novos_pts = OptFlow(old_frame, frame, novos_pts) #tem que transformar esses novos pts em p0...

@@ -507,6 +507,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
     texto3 = arquivo3.readlines()
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
+
     arquivo4 = open('resultados/res_numpy.txt', 'r')
     texto4 = arquivo4.readlines()
     arquivo4 = open('resultados/res_numpy.txt', 'w')
@@ -559,11 +560,6 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
             num_contorno+=1
             pp = Qnt_Pessoas_Contorno(w, largura_media)
             num_pessoas = num_pessoas + pp
-
-        ### XX OUTROS TESTES XX ###
-        #if (area>500 and w>40 and w<140 and h>70 and h<180):
-        ### XX OUTROS TESTES XX ###
-
             new_width = w/pp #calcular a nova largura de somente 1 pessoa
             lista_width.append(new_width)
             persons, pid, lista_cx, lista_cy, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, lista_cx, lista_cy, novos_pts)
@@ -763,13 +759,9 @@ def OptFlow(old_frame, frame, p0):
     old_gray = frame_gray.copy()
     #p0 = good_new.reshape(-1,1,2)
     try:
-        #print("gnr:"+str(good_new.reshape(-1,1,2)))
+        print("gnr:"+str(good_new.reshape(-1,1,2)))
+        good_new = good_new.reshape(-1,1,2)
         novos_pts = good_new
     except:
-        a=np.array([]) #todos x na ordem
-        b=np.array([]) #todos y na ordem
-        #p0 = [[[468,217]], [[744,211]], [[660,198]], [[692,182]], [[139,121]]]
-        #p0 = np.ndarray((len(p0), 2), buffer=np.array(p0), dtype=np.float32)
-        novos_pts = np.dstack((a,b))
-        novos_pts = novos_pts.astype(np.float32)
+       pass
     return (novos_pts)
