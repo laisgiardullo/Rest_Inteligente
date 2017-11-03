@@ -1,3 +1,5 @@
+#documento com funcoes utilizadas pelos metodos de deteccao
+
 import numpy as np
 import cv2
 from autocanny import *

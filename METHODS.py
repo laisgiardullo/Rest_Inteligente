@@ -1,3 +1,5 @@
+#Documento com funcoes de metodos utilizados para deteccao
+
 #ver https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.ndarray.html para numpy e https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.dtype.html
 import numpy as np
 import cv2
