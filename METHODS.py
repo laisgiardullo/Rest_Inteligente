@@ -720,7 +720,7 @@ def Countours_Area_Seguir(img, fgbg, persons, pid, max_p_age, num_frame, tempo_v
 
     return img2 , persons, pid, old_frame,p0
 
-def OptFlow(old_frame, frame, p0):
+def OptFlow(old_frame, frame, p0, mask):
             #fonte: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_video/py_lucas_kanade/py_lucas_kanade.html
 
     # Parameters for lucas kanade optical flow
@@ -730,38 +730,36 @@ def OptFlow(old_frame, frame, p0):
      
     # Create some random colors
     #color = np.random.randint(0,255,(100,3))
-    # Create a mask image for drawing purposes
-    mask = np.zeros_like(old_frame)
     old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # calculate optical flow
     p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-    #print("p1: "+str(p1))
-    try:
-        # Select good points
-        good_new = p1[st==1]
-        good_old = p0[st==1]
-        print("good_new:"+str(good_new))
-        print("good_old:"+str(good_new))
-        # draw the tracks
-        for i,(new,old) in enumerate(zip(good_new,good_old)):
-            a,b = new.ravel()
-            c,d = old.ravel()
-            mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
-            frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
-    except:
-        print("none")
+    print("p1: "+str(p1))
+    print ("lenp1:"+str(len(p1)))
+
+    # Select good points
+    good_new = p1[st==1]
+    good_old = p0[st==1]
+    print("good_new:"+str(good_new))
+    print("good_old:"+str(good_new))
+    # draw the tracks
+    for i,(new,old) in enumerate(zip(good_new,good_old)):
+        a,b = new.ravel()
+        c,d = old.ravel()
+        mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
+        frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
+
     img = cv2.add(frame,mask)
 
-    cv2.imshow('frame',img)
+    cv2.imshow('frame_optflow',img)
 
     # Now update the previous frame and previous points
     old_gray = frame_gray.copy()
     #p0 = good_new.reshape(-1,1,2)
     try:
         print("gnr:"+str(good_new.reshape(-1,1,2)))
-        good_new = good_new.reshape(-1,1,2)
+        good_new = good_new.reshape(-1,1,2) #voltar ao formato original de p0
         novos_pts = good_new
     except:
        pass
-    return (novos_pts)
+    return (novos_pts, mask)

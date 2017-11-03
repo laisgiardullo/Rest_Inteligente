@@ -38,9 +38,9 @@ elif (tipo ==2):
     ret, old_frame = cap.read() #read a frame
     a=np.array([]) #todos x na ordem
     b=np.array([]) #todos y na ordem
-    #p0 = [[[468,217]], [[744,211]], [[660,198]], [[692,182]], [[139,121]]]
-    #p0 = np.ndarray((len(p0), 2), buffer=np.array(p0), dtype=np.float32)
     novos_pts = []
+    # Create a mask image for drawing purposes
+    mask = np.zeros_like(old_frame)
     #novos_pts = np.dstack((a,b))
     #novos_pts = novos_pts.astype(np.float32) #mudar tipo de objetos do array para float32
     while(cap.isOpened()):
@@ -54,7 +54,7 @@ elif (tipo ==2):
         #    novos_pts = novos_pts.reshape(-1,1,2)
         #p0 = np.dstack((lista_cx,lista_cy))
         #p0 = p0.astype(np.float32)
-        novos_pts = OptFlow(old_frame, frame, novos_pts) #tem que transformar esses novos pts em p0...
+        novos_pts, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
         cv2.imshow('Frame',frame2)
         nframe +=1
         old_frame = frame
