@@ -500,6 +500,7 @@ def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video)
 
     return img , persons, pid
 
+#media frames:
 def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_video, lista_cx, lista_cy, novos_pts):
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
     texto3 = arquivo3.readlines()
