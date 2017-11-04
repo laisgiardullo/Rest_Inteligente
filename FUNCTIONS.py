@@ -69,13 +69,11 @@ def Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons):
         num_pessoas_media = num_pessoas_media/quantidade_frames_considerados
     return (num_pessoas_media)
 
-def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, lista_cx, lista_cy, novos_pts):
+def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts):
     it = 0 #it = iteracao
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        #for pt in (novos_pts):
-        #    print (pt[0][0])
         for ponto in range (len(novos_pts)):
             if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
                 novo = False
@@ -88,8 +86,8 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
             img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
             it+=new_width
-            lista_cx.append([cx])
-            lista_cy.append([cy])
+            #lista_cx.append([cx])
+            #lista_cy.append([cy])
             print("novospts:"+str(novos_pts))
             print ("cx e cy"+str(cx)+str(cy))
             pa = np.array ([[cx]])
@@ -100,7 +98,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
                 if (novos_pts !=[]):
                     novos_pts = np.append(novos_pts,nv_pt, axis = 0)
                 else: novos_pts = nv_pt
-    return (persons, pid, lista_cx, lista_cy, novos_pts)
+    return (persons, pid, novos_pts)
 
 
 

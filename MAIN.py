@@ -5,7 +5,7 @@ from METHODS import *
 import Person
 import time
 
-cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 cap.set(3,160) #set width (3) para 160
@@ -33,8 +33,6 @@ if (tipo == 1):
         if k == 27:
             break
 elif (tipo ==2):
-    lista_cx=[]
-    lista_cy=[]
     ret, old_frame = cap.read() #read a frame
     a=np.array([]) #todos x na ordem
     b=np.array([]) #todos y na ordem
@@ -46,7 +44,7 @@ elif (tipo ==2):
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
         tempo_video = cap.get(0)
-        frame2, persons, pid, lista_cx, lista_cy, novos_pts = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, lista_cx, lista_cy, novos_pts)
+        frame2, persons, pid, novos_pts = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, novos_pts)
         #frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid, old_frame,p0 = Countours_Area_Seguir(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, old_frame,p0, p1)
