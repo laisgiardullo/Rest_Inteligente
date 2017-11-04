@@ -77,12 +77,10 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
         #for pt in (novos_pts):
         #    print (pt[0][0])
         for ponto in range (len(novos_pts)):
-            try:
-                if((abs(cx-(novos_pts[ponto][0][0]))<new_width) or (abs(cy-(novos_pts[ponto][0][1]))<h)):
-                    novo = False
-            except:
-                pass
+            if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
+                novo = False
         if (novo):
+            print ("sounovo")
             p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
             persons.append(p)
             pid += 1
@@ -98,10 +96,10 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             pb = np.array ([[cy]])
             nv_pt = np.dstack((pa,pb))
             nv_pt = nv_pt.astype(np.float32)
-
-            if (novos_pts !=[]):
-                novos_pts = np.append(novos_pts,nv_pt, axis = 0)
-            else: novos_pts = nv_pt
+            if (num_frame>20): #so comeca a guardar depois do 21 que e quando estabiliza o background
+                if (novos_pts !=[]):
+                    novos_pts = np.append(novos_pts,nv_pt, axis = 0)
+                else: novos_pts = nv_pt
     return (persons, pid, lista_cx, lista_cy, novos_pts)
 
 

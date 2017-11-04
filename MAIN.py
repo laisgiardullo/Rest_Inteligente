@@ -54,7 +54,8 @@ elif (tipo ==2):
         #    novos_pts = novos_pts.reshape(-1,1,2)
         #p0 = np.dstack((lista_cx,lista_cy))
         #p0 = p0.astype(np.float32)
-        novos_pts, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
+        if (novos_pts!=[]):
+            novos_pts, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
         cv2.imshow('Frame',frame2)
         nframe +=1
         old_frame = frame
