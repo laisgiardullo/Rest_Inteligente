@@ -231,9 +231,9 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
 
 
                             ## XX EXCLUIR APOS TESTES XX ##
-                            print ("aqui false")
-                            print (new)
-                            print (i.i)
+                            #print ("aqui false")
+                            #print (new)
+                            #print (i.i)
                             ## XX EXCLUIR APOS TESTES XX ##
                         elif ((i.getX() >= (new_x) and i.getX() <= (new_x + new_width))):
                             new = False
@@ -245,10 +245,10 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
                 if (new == True):
 
                     ## XX EXCLUIR APOS TESTES XX ##
-                    print ("NOVO OBJETO")
-                    print ("ID:"+str(pid))
-                    print ("Cx:"+str(cx)+" Cy:"+str(cy))
-                    print ("Num Contorno:"+str(num_contorno))
+                    #print ("NOVO OBJETO")
+                    #print ("ID:"+str(pid))
+                    #print ("Cx:"+str(cx)+" Cy:"+str(cy))
+                    #print ("Num Contorno:"+str(num_contorno))
                     ## XX EXCLUIR APOS TESTES XX ##
 
                     texto.append('\n \n NOVO OBJETO: ID '+str(pid))
@@ -288,14 +288,14 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
             else:
 
                 ## XX EXCLUIR APOS TESTES XX ##
-                print (" ")
-                print ("Pessoas:")
-                print (pessoas2)
-                print ("id:"+str(i.i))
-                print(i.x)
-                print(i.y)
-                print (i.tracks)
-                print (i.status)
+                #print (" ")
+                #print ("Pessoas:")
+                #print (pessoas2)
+                #print ("id:"+str(i.i))
+                #print(i.x)
+                #print(i.y)
+                #print (i.tracks)
+                #print (i.status)
 
                 texto.append("\n Pessoas:"+str(pessoas2))
                 texto.append('\n ID '+str(i.i))
@@ -305,8 +305,8 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
                 texto.append(' \n \n')
 
                 ## XX EXCLUIR APOS TESTES XX ##
-
-                cv2.circle(img,(i.getX(),i.getY()), 5, (0,0,255), -1) #desenho a bolinha vermelha
+                #cv2.circle(img, center, radius, color[, thickness[, lineType[, shift]]])
+                cv2.circle(img,(i.getX(),i.getY()), 5, (0,0,255), 10) #desenho a bolinha vermelha
                 pessoas2=pessoas2+1 #somo ao contador de pessoas
 
     ## XX EXCLUIR APOS TESTES XX ##

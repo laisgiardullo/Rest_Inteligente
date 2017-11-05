@@ -5,7 +5,7 @@ from METHODS import *
 import Person
 import time
 
-cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 cap.set(3,160) #set width (3) para 160
@@ -54,7 +54,7 @@ elif (tipo ==2):
         #p0 = p0.astype(np.float32)
         if (novos_pts!=[]):
             novos_pts, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
-        cv2.imshow('Frame',frame2)
+        #cv2.imshow('Frame',frame2)
         nframe +=1
         old_frame = frame
         #Abort and exit with 'Q' or ESC
