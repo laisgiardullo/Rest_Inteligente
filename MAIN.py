@@ -4,6 +4,8 @@ from autocanny import *
 from METHODS import *
 import Person
 import time
+import sqlite3 as lite
+import sys
 
 #cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
@@ -19,7 +21,8 @@ nframe = 0
 old_frame = 0
 p0=[]
 p1=[]
-tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n")
+con = lite.connect('Video_Intel.db')
+tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
 if (tipo == 1):
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
@@ -45,7 +48,7 @@ elif (tipo ==2):
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
         tempo_video = cap.get(0)
-        frame2, persons, pid, novos_pts = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, novos_pts)
+        frame2, persons, pid, novos_pts = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, novos_pts, con)
         #frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
         #frame2, persons, pid, old_frame,p0 = Countours_Area_Seguir(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, old_frame,p0, p1)
@@ -61,12 +64,26 @@ elif (tipo ==2):
         #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:
+            con.close()
             break
 elif (tipo ==3):
      while(cap.isOpened()):
         ret, frame = cap.read()
         frame2 = Cascade1(frame)
         cv2.imshow('Frame',frame2)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            break
+if (tipo == 4):
+    while(cap.isOpened()):
+        ret, frame = cap.read() #read a frame
+        tempo_video = cap.get(0)
+        #frame2 = Cascade1(frame)
+        #frame2 = Countours (frame, fgbg)
+        frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
+        cv2.imshow('Frame',frame2)
+        nframe +=1
+        #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:
             break

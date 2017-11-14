@@ -5,6 +5,7 @@ import cv2
 from autocanny import *
 import Person
 import time
+import sqlite3 as lite
 
 def Largura_Media(x, y):
     largura_media = 31
@@ -69,8 +70,9 @@ def Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons):
         num_pessoas_media = num_pessoas_media/quantidade_frames_considerados
     return (num_pessoas_media)
 
-def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts):
+def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts, con):
     it = 0 #it = iteracao
+    lista_obj = []
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
@@ -78,8 +80,11 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
                 novo = False
         if (novo):
-            print ("sounovo")
+            #print ("sounovo")
             p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
+            #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
+            #obj_pessoa = ((pid,cx,cy,'in',new_width,num_frame,tempo_video))
+            lista_obj.append((pid,cx,cy,'in',new_width,num_frame,tempo_video))
             persons.append(p)
             pid += 1
             #########   EXPLICACAO LOGICA   ###########
@@ -89,15 +94,19 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             #lista_cx.append([cx])
             #lista_cy.append([cy])
             print("novospts:"+str(novos_pts))
-            print ("cx e cy"+str(cx)+str(cy))
+            #print ("cx e cy"+str(cx)+str(cy))
             pa = np.array ([[cx]])
             pb = np.array ([[cy]])
             nv_pt = np.dstack((pa,pb))
             nv_pt = nv_pt.astype(np.float32)
-            if (num_frame>20): #so comeca a guardar depois do 21 que e quando estabiliza o background
+            if (num_frame>20): #so comeca a guardar depois do 21 que eh quando estabiliza o background
                 if (novos_pts !=[]):
                     novos_pts = np.append(novos_pts,nv_pt, axis = 0)
                 else: novos_pts = nv_pt
+    if (lista_obj!=[]):
+        with con:
+            cur = con.cursor()
+            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?,?,?)", lista_obj)
     return (persons, pid, novos_pts)
 
 

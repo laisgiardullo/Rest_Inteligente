@@ -8,6 +8,8 @@ from autocanny import *
 import Person
 import time
 from FUNCTIONS import *
+import sqlite3 as lite
+import sys
 
 
 def Cascade1 (img):
@@ -298,6 +300,7 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
     texto.append('\n \n TOTAL DE OBJETOS')
     texto.append('\n \n ')
     for i in persons:
+        print(i.status)
         if (i.status == "in"):
             if ((nframe - i.ultimo_frame)>4):
                 i.setOff()
@@ -432,6 +435,7 @@ def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video)
                 #########   EXPLICACAO LOGICA    ###########
                 #Agora vamos percorrer todos os objetos da classe MyPerson e compara-los com o contorno em questao
                 for i in persons:
+                    print(i.status)
                     if (i.status == "in"):
                         ### XX OUTROS TESTES XX ###
                         #print (i.getX())
@@ -519,7 +523,7 @@ def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video)
     return img , persons, pid
 
 #media frames:
-def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_video, novos_pts):
+def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_video, novos_pts, con):
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
     texto3 = arquivo3.readlines()
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
@@ -578,7 +582,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
             num_pessoas = num_pessoas + pp
             new_width = w/pp #calcular a nova largura de somente 1 pessoa
             lista_width.append(new_width)
-            persons, pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts)
+            persons, pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts,con)
 
                 ### XX OUTROS TESTES XX ###
                 #cv2.circle(img,(cx,cy), 5, (0,0,255), -1)           
@@ -588,6 +592,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
     
     #########   EXPLICACAO LOGICA   ###########
     #Agora, vou percorrer todos os objetos de pessoas salvos e calcular o numero aproximado de pessoas baseado na media anterior
+    con.commit()
     num_pessoas_media = Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons)
  
     texto3.append(str(num_pessoas)+";"+str(num_pessoas_media)+";"+str(tempo_video)+"\n")
