@@ -73,6 +73,7 @@ def Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons):
 def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts, con):
     it = 0 #it = iteracao
     lista_obj = []
+    lista_obj_pos = []
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
@@ -81,11 +82,13 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
                 novo = False
         if (novo):
             #print ("sounovo")
-            p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
+            #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
             #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
-            #obj_pessoa = ((pid,cx,cy,'in',new_width,num_frame,tempo_video))
-            lista_obj.append((pid,cx,cy,'in',new_width,num_frame,tempo_video))
-            persons.append(p)
+            #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
+
+            lista_obj.append((pid,'in',new_width,tempo_video, None))
+            lista_obj_pos.append((None, cx, cy, tempo_video, None, True, pid))
+            #persons.append(p)
             pid += 1
             #########   EXPLICACAO LOGICA   ###########
             ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
@@ -106,7 +109,8 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
     if (lista_obj!=[]):
         with con:
             cur = con.cursor()
-            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?,?,?)", lista_obj)
+            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+            cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
     return (persons, pid, novos_pts)
 
 

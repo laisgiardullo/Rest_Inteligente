@@ -64,6 +64,7 @@ elif (tipo ==2):
         #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:
+            con.commit()
             con.close()
             break
 elif (tipo ==3):
