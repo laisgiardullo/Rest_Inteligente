@@ -74,12 +74,17 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
     it = 0 #it = iteracao
     lista_obj = []
     lista_obj_pos = []
+    cur = con.cursor()
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        for ponto in range (len(novos_pts)):
-            if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
-                novo = False
+        cur.execute("""SELECT * FROM 'Posicao' WHERE abs(?-X)>? AND abs(?-Y)<60 AND Atual=1""", (cx, new_width, cy ))
+        if (len(cur.fetchall())>0):
+            #print("eh velho")
+            novo = False
+        #for ponto in range (len(novos_pts)):
+        #    if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
+        #        novo = False
         if (novo):
             #print ("sounovo")
             #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
@@ -87,7 +92,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
 
             lista_obj.append((pid,'in',new_width,tempo_video, None))
-            lista_obj_pos.append((None, cx, cy, tempo_video, None, True, pid))
+            lista_obj_pos.append((None, cx, cy, tempo_video, None, 1, pid))
             #persons.append(p)
             pid += 1
             #########   EXPLICACAO LOGICA   ###########
@@ -96,7 +101,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             it+=new_width
             #lista_cx.append([cx])
             #lista_cy.append([cy])
-            print("novospts:"+str(novos_pts))
+            #print("novospts:"+str(novos_pts))
             #print ("cx e cy"+str(cx)+str(cy))
             pa = np.array ([[cx]])
             pb = np.array ([[cy]])
@@ -112,6 +117,42 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
             cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
     return (persons, pid, novos_pts)
+
+def Tranformar_em_Numpy(lista_posicoes):
+    pontos_numpy = []
+    for elemento in lista_posicoes:
+        pa = np.array ([[elemento[1]]]) #X eh salvo na posicao 6 do objeto posicao
+        pb = np.array ([[elemento[2]]]) #Y eh salvo na posicao 6 do objeto posicao
+        nv_pt = np.dstack((pa,pb))
+        nv_pt = nv_pt.astype(np.float32)
+        if (pontos_numpy !=[]):
+            pontos_numpy = np.append(pontos_numpy,nv_pt, axis = 0)
+        else: pontos_numpy = nv_pt
+    return(pontos_numpy)
+
+def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, mask, frame):
+    for ponto in range (len(novos_pts)):
+        
+        antigo_x = novos_pts[ponto][0][0]
+        novo_x = novos_pts_prox[ponto][0][0]
+        print("novo_x="+str(novo_x))
+        antigo_y = novos_pts[ponto][0][1]
+        novo_y = novos_pts_prox[ponto][0][1]
+
+        #se valores forem diferentes
+        if ((antigo_x!=novo_x) or (antigo_y!=novo_y)):
+            id_posicao = objetos_ativos[ponto][0]
+            id_pessoa = objetos_ativos[ponto][6]
+            cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
+            #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
+            valores_input = (None, int(novo_x), int(novo_y), tempo_video, None, 1, id_pessoa)
+            cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
+            mask = cv2.line(mask, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
+            frame = cv2.circle(frame,(novo_x,novo_y),5,(0,255,0),-1)
+    img = cv2.add(frame,mask)
+    cv2.imshow('frame_optflow',img)
+
+    return
 
 
 

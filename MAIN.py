@@ -7,8 +7,8 @@ import time
 import sqlite3 as lite
 import sys
 
-#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
-cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 cap.set(3,160) #set width (3) para 160
@@ -22,6 +22,7 @@ old_frame = 0
 p0=[]
 p1=[]
 con = lite.connect('Video_Intel.db')
+cur = con.cursor()
 tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
 if (tipo == 1):
     while(cap.isOpened()):
@@ -56,11 +57,18 @@ elif (tipo ==2):
         #    novos_pts = novos_pts.reshape(-1,1,2)
         #p0 = np.dstack((lista_cx,lista_cy))
         #p0 = p0.astype(np.float32)
+        cur.execute("""SELECT * FROM 'Posicao' WHERE Atual=1""")
+        objetos_ativos = cur.fetchall() #resultado inteiro da ultima selecao
+        novos_pts = Tranformar_em_Numpy(objetos_ativos)
+        print("novos_pts="+str(novos_pts))
         if (novos_pts!=[]):
-            novos_pts, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
+            novos_pts_prox, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
+            Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, frame2, mask)
+            #novos_pts = novos_pts_prox
         #cv2.imshow('Frame',frame2)
         nframe +=1
         old_frame = frame
+        
         #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:

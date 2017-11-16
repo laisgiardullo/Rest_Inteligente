@@ -566,7 +566,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
 
     num_contorno = 0
     lista_width = []
-    texto4.append(str(contours1))
+    #texto4.append(str(contours1))
     #print (contours1)
     for cnt in contours1:
         cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
@@ -622,35 +622,36 @@ def OptFlow(old_frame, frame, p0, mask):
     p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
     print("p1: "+str(p1))
 
-    # Select good points
-    good_new = p1[st==1]
-    good_old = p0[st==1]
-    print("good_new:"+str(good_new))
-    print("good_old:"+str(good_new))
-    # draw the tracks
+    # # Select good points
+    # good_new = p1[st==1] #status==1: flow foi encontrado
+    # good_old = p0[st==1]
+    # print("good_new:"+str(good_new))
+    # print("good_old:"+str(good_new))
+    # # draw the tracks
 
-    #ZIP x = [1, 2, 3], y = [4, 5, 6], zip(x, y) =[(1, 4), (2, 5), (3, 6)]
-    #ENUMERATE seasons = ['Spring', 'Summer', 'Fall', 'Winter'], list(enumerate(seasons)) = [(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
-    # i = numero do enumerate, new = elemento do good_new, old = elemento do good_old
-    for i,(new,old) in enumerate(zip(good_new,good_old)):
-        a,b = new.ravel() #ravel: A 1-D array, containing the elements of the input, is returned
-        c,d = old.ravel()
-        #if((a,b)!=(c,d)):
+    # #ZIP x = [1, 2, 3], y = [4, 5, 6], zip(x, y) =[(1, 4), (2, 5), (3, 6)]
+    # #ENUMERATE seasons = ['Spring', 'Summer', 'Fall', 'Winter'], list(enumerate(seasons)) = [(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+    # # i = numero do enumerate, new = elemento do good_new, old = elemento do good_old
+    # for i,(new,old) in enumerate(zip(good_new,good_old)):
+    #     a,b = new.ravel() #ravel: A 1-D array, containing the elements of the input, is returned
+    #     c,d = old.ravel()
+    #     #if((a,b)!=(c,d)):
 
-        mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
-        frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
+    #     mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
+    #     frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
 
-    img = cv2.add(frame,mask)
+    # img = cv2.add(frame,mask)
 
-    cv2.imshow('frame_optflow',img)
+    # cv2.imshow('frame_optflow',img)
 
-    # Now update the previous frame and previous points
-    old_gray = frame_gray.copy()
-    #p0 = good_new.reshape(-1,1,2)
-    try:
-        print("gnr:"+str(good_new.reshape(-1,1,2)))
-        good_new = good_new.reshape(-1,1,2) #voltar ao formato original de p0
-        novos_pts = good_new
-    except:
-       pass
+    # # Now update the previous frame and previous points
+    # old_gray = frame_gray.copy()
+    # #p0 = good_new.reshape(-1,1,2)
+    # try:
+    #     print("gnr:"+str(good_new.reshape(-1,1,2)))
+    #     good_new = good_new.reshape(-1,1,2) #voltar ao formato original de p0
+    #     novos_pts = good_new
+    # except:
+    #    pass
+    novos_pts = p1
     return (novos_pts, mask)
