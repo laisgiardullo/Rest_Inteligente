@@ -133,22 +133,23 @@ def Tranformar_em_Numpy(lista_posicoes):
 def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, mask, frame):
     for ponto in range (len(novos_pts)):
         
-        antigo_x = novos_pts[ponto][0][0]
-        novo_x = novos_pts_prox[ponto][0][0]
+        antigo_x = int(novos_pts[ponto][0][0])
+        novo_x = int(novos_pts_prox[ponto][0][0])
         print("novo_x="+str(novo_x))
-        antigo_y = novos_pts[ponto][0][1]
-        novo_y = novos_pts_prox[ponto][0][1]
+        antigo_y = int(novos_pts[ponto][0][1])
+        novo_y = int(novos_pts_prox[ponto][0][1])
 
+        id_posicao = objetos_ativos[ponto][0]
+        id_pessoa = objetos_ativos[ponto][6]
         #se valores forem diferentes
         if ((antigo_x!=novo_x) or (antigo_y!=novo_y)):
-            id_posicao = objetos_ativos[ponto][0]
-            id_pessoa = objetos_ativos[ponto][6]
             cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
             #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
             valores_input = (None, int(novo_x), int(novo_y), tempo_video, None, 1, id_pessoa)
             cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
             mask = cv2.line(mask, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
-            frame = cv2.circle(frame,(novo_x,novo_y),5,(0,255,0),-1)
+            mask = cv2.circle(mask,(novo_x,novo_y),5,(0,255,0),-1)
+        mask = cv2.putText(mask, str(id_pessoa), (novo_x, novo_y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
     img = cv2.add(frame,mask)
     cv2.imshow('frame_optflow',img)
 

@@ -23,7 +23,9 @@ p0=[]
 p1=[]
 con = lite.connect('Video_Intel.db')
 cur = con.cursor()
+
 tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
+
 if (tipo == 1):
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
