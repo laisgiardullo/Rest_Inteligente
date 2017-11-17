@@ -564,38 +564,40 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
     #_, contours0, hierarchy = cv2.findContours(teste2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     ### XX OUTROS TESTES XX ###
 
-    num_contorno = 0
-    lista_width = []
+    #num_contorno = 0
+    #lista_width = []
     #texto4.append(str(contours1))
     #print (contours1)
-    for cnt in contours1:
-        cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
-        area = cv2.contourArea(cnt)
-        
-        #########   LINK   ###########
-        #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
-        x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
-        largura_media = Largura_Media(x,y)
-        if (area>areaTH):
-            num_contorno+=1
-            pp = Qnt_Pessoas_Contorno(w, largura_media)
-            num_pessoas = num_pessoas + pp
-            new_width = w/pp #calcular a nova largura de somente 1 pessoa
-            #lista_width.append(new_width)
-            persons, pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts,con)
+    if (num_frame>20):
+        for cnt in contours1:
+            cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
+            area = cv2.contourArea(cnt)
+            
+            #########   LINK   ###########
+            #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
+            x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
 
-                ### XX OUTROS TESTES XX ###
-                #cv2.circle(img,(cx,cy), 5, (0,0,255), -1)           
-                #textw = "Width " + str(new_width)
-                #texth = "Height " + str(h)
-                ### XX OUTROS TESTES XX ###
-    
-    #########   EXPLICACAO LOGICA   ###########
-    #Agora, vou percorrer todos os objetos de pessoas salvos e calcular o numero aproximado de pessoas baseado na media anterior
-    #con.commit()
-    num_pessoas_media = Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons)
- 
-    texto3.append(str(num_pessoas)+";"+str(num_pessoas_media)+";"+str(tempo_video)+"\n")
+            largura_media = Largura_Media(x,y)
+            if (area>areaTH):
+                #num_contorno+=1
+                pp = Qnt_Pessoas_Contorno(w, largura_media)
+                num_pessoas = num_pessoas + pp
+                new_width = w/pp #calcular a nova largura de somente 1 pessoa
+                #lista_width.append(new_width)
+                pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts,con)
+
+                    ### XX OUTROS TESTES XX ###
+                    #cv2.circle(img,(cx,cy), 5, (0,0,255), -1)           
+                    #textw = "Width " + str(new_width)
+                    #texth = "Height " + str(h)
+                    ### XX OUTROS TESTES XX ###
+        
+        #########   EXPLICACAO LOGICA   ###########
+        #Agora, vou percorrer todos os objetos de pessoas salvos e calcular o numero aproximado de pessoas baseado na media anterior
+        #con.commit()
+        num_pessoas_media = Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons)
+     
+        texto3.append(str(num_pessoas)+";"+str(num_pessoas_media)+";"+str(tempo_video)+"\n")
 
     arquivo3.writelines(texto3)
     arquivo3.close()

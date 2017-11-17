@@ -70,7 +70,7 @@ def Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons):
         num_pessoas_media = num_pessoas_media/quantidade_frames_considerados
     return (num_pessoas_media)
 
-def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_frame,tempo_video, novos_pts, con):
+def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts, con):
     it = 0 #it = iteracao
     lista_obj = []
     lista_obj_pos = []
@@ -78,7 +78,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        cur.execute("""SELECT * FROM 'Posicao' WHERE abs(?-X)>? AND abs(?-Y)<60 AND Atual=1""", (cx, new_width, cy ))
+        cur.execute("""SELECT * FROM 'Posicao' WHERE abs(?-X)<? AND abs(?-Y)<60 AND Atual=1""", (cx, new_width, cy ))
         if (len(cur.fetchall())>0):
             #print("eh velho")
             novo = False
@@ -99,10 +99,6 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
             img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
             it+=new_width
-            #lista_cx.append([cx])
-            #lista_cy.append([cy])
-            #print("novospts:"+str(novos_pts))
-            #print ("cx e cy"+str(cx)+str(cy))
             pa = np.array ([[cx]])
             pb = np.array ([[cy]])
             nv_pt = np.dstack((pa,pb))
@@ -116,7 +112,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, persons, num_
             cur = con.cursor()
             cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
             cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
-    return (persons, pid, novos_pts)
+    return (pid, novos_pts)
 
 def Tranformar_em_Numpy(lista_posicoes):
     pontos_numpy = []
@@ -131,6 +127,7 @@ def Tranformar_em_Numpy(lista_posicoes):
     return(pontos_numpy)
 
 def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, mask, frame):
+    mask_novo = mask
     for ponto in range (len(novos_pts)):
         
         antigo_x = int(novos_pts[ponto][0][0])
@@ -147,10 +144,10 @@ def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, c
             #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
             valores_input = (None, int(novo_x), int(novo_y), tempo_video, None, 1, id_pessoa)
             cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
-            mask = cv2.line(mask, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
-            mask = cv2.circle(mask,(novo_x,novo_y),5,(0,255,0),-1)
-        mask = cv2.putText(mask, str(id_pessoa), (novo_x, novo_y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
-    img = cv2.add(frame,mask)
+            mask_novo = cv2.line(mask_novo, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
+            mask_novo = cv2.circle(mask_novo,(novo_x,novo_y),5,(0,255,0),-1)
+        mask_novo = cv2.putText(mask_novo, str(id_pessoa), (novo_x, novo_y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
+    img = cv2.add(frame,mask_novo)
     cv2.imshow('frame_optflow',img)
 
     return
