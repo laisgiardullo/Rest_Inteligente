@@ -9,6 +9,7 @@ import sys
 
 cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 cap.set(3,160) #set width (3) para 160
@@ -32,7 +33,7 @@ if (tipo == 1):
         tempo_video = cap.get(0)
         #frame2 = Cascade1(frame)
         #frame2 = Countours (frame, fgbg)
-        frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
+        frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video, con)
         cv2.imshow('Frame',frame2)
         nframe +=1
         #Abort and exit with 'Q' or ESC
@@ -80,7 +81,7 @@ elif (tipo ==2):
 elif (tipo ==3):
      while(cap.isOpened()):
         ret, frame = cap.read()
-        frame2 = Cascade1(frame)
+        frame2 = Cascade(frame)
         cv2.imshow('Frame',frame2)
         k = cv2.waitKey(30) & 0xff
         if k == 27:

@@ -7,6 +7,25 @@ import Person
 import time
 import sqlite3 as lite
 
+def Pessoa_Nova(cx, new_width, cy, cur):
+    xa = 31
+    ya = 60
+    limite = xa*xa+ya*ya
+    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<? AND Atual=1 ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, cx, cx, cy, cy, ))
+    
+    #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
+    lista = cur.fetchall()
+    if (len(lista)>0):
+        #print("eh velho")
+        id_pessoa= lista[0][6]
+        id_posicao=lista[0][0]
+        novo = False
+    else:
+        novo = True
+        id_pessoa= None
+        id_posicao=None
+    return (novo, id_pessoa, id_posicao)
+
 def Largura_Media(x, y):
     largura_media = 31
     return (largura_media)
@@ -78,13 +97,7 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tem
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        cur.execute("""SELECT * FROM 'Posicao' WHERE abs(?-X)<? AND abs(?-Y)<60 AND Atual=1""", (cx, new_width, cy ))
-        if (len(cur.fetchall())>0):
-            #print("eh velho")
-            novo = False
-        #for ponto in range (len(novos_pts)):
-        #    if((abs(cx-(novos_pts[ponto][0][0]))<new_width) and (abs(cy-(novos_pts[ponto][0][1]))<60)):
-        #        novo = False
+        novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur)
         if (novo):
             #print ("sounovo")
             #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
@@ -185,3 +198,46 @@ def Imprimir_ObjetoseTracks(texto, pessoas2, i):
     texto.append('\n Status '+str(i.status))
     texto.append(' \n \n')
     return(texto)
+
+
+
+def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, con):
+    it = 0 #it = iteracao
+    lista_obj = []
+    lista_obj_pos = []
+    cur = con.cursor()
+    mask_novo = img
+    for i in range (pp):
+        novo = True
+        new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
+        novo, id_pessoa, id_posicao = Pessoa_Nova(cx, new_width, cy, cur)
+        if (novo):
+            #print ("sounovo")
+            #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
+            #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
+            #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
+
+            lista_obj.append((pid,'in',new_width,tempo_video, None))
+            lista_obj_pos.append((None, cx, cy, tempo_video, None, 1, pid))
+            #persons.append(p)
+            pid += 1
+            #########   EXPLICACAO LOGICA   ###########
+            ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
+            img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
+            it+=new_width
+
+        else:
+            cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
+            #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
+            valores_input = (None, int(new_x), int(cy), tempo_video, None, 1, id_pessoa)
+            cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
+
+            #mask_novo = cv2.line(mask_novo, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
+            mask_novo = cv2.circle(img,(new_x,cy),5,(0,255,0),-1)
+        mask_novo = cv2.putText(mask_novo, str(id_pessoa), (new_x, cy), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
+    cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+    cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+    img = cv2.add(img,mask_novo)
+    cv2.imshow('frame_optflow',img)
+
+    return (pid)

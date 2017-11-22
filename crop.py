@@ -64,8 +64,8 @@ if len(refPt) == 2:
 	print (refPt[0][1])
 	print (refPt[1][0])
 	print(refPt[1][1])
-	print ("A largura da imagem é de", refPt[1][0] - refPt[0][0])
-        print ("A altura da imagem é de", refPt[1][1] - refPt[0][1])        
+	print ("A largura da imagem e de", refPt[1][0] - refPt[0][0])
+        print ("A altura da imagem e de", refPt[1][1] - refPt[0][1])        
 	cv2.imshow("ROI", roi)
 	cv2.waitKey(0)
  

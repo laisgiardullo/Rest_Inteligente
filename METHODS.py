@@ -153,7 +153,7 @@ def Countours (img, fgbg):
                      ,1,(255,255,255),1,cv2.LINE_AA)
     return img
 
-def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
+def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video, con):
     arquivo = open('resultados/resultado_testes.txt', 'r')
     texto = arquivo.readlines()
     arquivo2 = open('resultados/resultado_testes_frame.txt', 'r')
@@ -173,7 +173,6 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
     i=0
     n_cont=0
     fgmask = fgbg.apply(img) #Use the substractor: aqui, o fundo, que nao esta mexendo, fica preto e o que esta se movimentando branco
-    cv2.imshow('fgmask',fgmask)
     try:
 
         mask = Aplicacao_Mascara(fgmask)
@@ -212,142 +211,15 @@ def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
             if (pp==0): pp=1
             num_pessoas = num_pessoas + pp
 
-        ### XX OUTROS TESTES XX ###
-        #if (area>500 and w>40 and w<140 and h>70 and h<180):
-        ### XX OUTROS TESTES XX ###
+            ### XX OUTROS TESTES XX ###
+            #if (area>500 and w>40 and w<140 and h>70 and h<180):
+            ### XX OUTROS TESTES XX ###
 
             new_width = w/pp #calcular a nova largura de somente 1 pessoa
             it = 0 #it = iteracao
-            for i in range (pp):
-                new_x = x+it #novo valor de x, caso seja mais de 1 pessoa 
-                new = True #new = nova pessoa
-                cx = new_x + (new_width/2) #cx = o centro do retangulo da pessoa, em x
-                cy = y + (h/2) #cy = o centro do retangulo da pessoa, em y
 
-                #########   EXPLICACAO LOGICA    ###########
-                #Agora vamos percorrer todos os objetos da classe MyPerson e compara-los com o contorno em questao
-                for i in persons:
-                    if (i.status == "in"):
-                        ### XX OUTROS TESTES XX ###
-                        #print (i.getX())
-                        #print("NOVOX"+str(new_x)+"WIDTH"+str(new_width))
-                        #if abs(cx-i.getX()) <= new_width and abs(cy-i.getY()) <= h:
-                        #if abs(new_x-i.getX()) <= new_width and abs(y-i.getY()) <= h:
-                        ### XX OUTROS TESTES XX ###
+            pid = Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, nframe,tempo_video, con)
 
-                        #########   EXPLICACAO LOGICA    ###########
-                        # novo retangulo tem vertices em x = new_x e em x= (new_x + new_width)
-                        # se antigo centro (do objeto i em persons) estiver dentro retangulo novo.. Ainda e o mesmo objeto e so atualizamos seu novo centro
-                        if (i.getX() >= (new_x) and i.getX() <= (new_x + new_width)):
-                        #dist = math.sqrt((cx - i.getX())**2 + (cy - i.getY())**2)
-                        #if (dist <= w/2 and dist <= h/2):
-
-                        #if ((cx >= (i.x - (i.width/2))) and (cx <= (i.x + (i.width/2)))):self, xn, yn, nframe, instante
-                            new = False
-                            i.updateCoords(cx,cy, nframe, tempo_video)   #actualiza coordenadas en el objeto and resets age
-                            if (new_x < 150): i.setOut() #se ele passou pela porta de saida
-
-
-                            ## XX EXCLUIR APOS TESTES XX ##
-                            #print ("aqui false")
-                            #print (new)
-                            #print (i.i)
-                            ## XX EXCLUIR APOS TESTES XX ##
-                        elif ((i.getX() >= (new_x) and i.getX() <= (new_x + new_width))):
-                            new = False
-                            i.updateCoords(cx,cy, nframe, tempo_video)   #actualiza coordenadas en el objeto and resets age
-                            if (new_x < 150): i.setOut() #se ele passou pela porta de saida
-
-                #########   EXPLICACAO LOGICA   ###########
-                #Se ele nao achou nenhum objeto antigo com coordenadas parecidas, new vai continuar True e eu preciso criar um novo objeto
-                if (new == True):
-
-                    ## XX EXCLUIR APOS TESTES XX ##
-                    #print ("NOVO OBJETO")
-                    #print ("ID:"+str(pid))
-                    #print ("Cx:"+str(cx)+" Cy:"+str(cy))
-                    #print ("Num Contorno:"+str(num_contorno))
-                    ## XX EXCLUIR APOS TESTES XX ##
-
-                    texto.append('\n \n NOVO OBJETO: ID '+str(pid))
-                    texto.append("\n Cx:"+str(cx)+" Cy:"+str(cy))
-                    texto.append("\n Num Contorno:"+str(num_contorno))
-                    texto.append('\n \n ')
-
-
-                    #########   EXPLICACAO FUNCAO   ###########
-                    #pid = id, cx = centro x, cy = centro y, max_p_age = idade maxima, "in" = status (dentro do restaurante)
-                    #self, i, xi, yi, max_age, status, width, num_frame, instante
-                    p = Person.MyPerson(pid,cx,cy, max_p_age, "in", new_width, nframe,tempo_video)
-                    persons.append(p)
-                    pid += 1
-
-                #########   EXPLICACAO LOGICA   ###########
-                ##agora, vamos fazer um teste: desenhar retangulo para comparar com as bolinhas
-                img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
-
-                ### XX OUTROS TESTES XX ###
-                #cv2.circle(img,(cx,cy), 5, (0,0,255), -1)           
-                #textw = "Width " + str(new_width)
-                #texth = "Height " + str(h)
-                ### XX OUTROS TESTES XX ###
-
-                it = it + new_width #somo a iteracao a nova largura, para desenho da proxima pessoa no mesmo contorno (grupo)
-    
-    #########   EXPLICACAO LOGICA   ###########
-    #Agora, vou percorrer todos os objetos de pessoas salvos e desenhar uma bolinha vermelha nos que estao no restaurante (status == "in")
-    pessoas2 = 0 #contador de pessoas
-    texto.append('\n \n TOTAL DE OBJETOS')
-    texto.append('\n \n ')
-    for i in persons:
-        print(i.status)
-        if (i.status == "in"):
-            if ((nframe - i.ultimo_frame)>4):
-                i.setOff()
-            else:
-
-                ## XX EXCLUIR APOS TESTES XX ##
-                #print (" ")
-                #print ("Pessoas:")
-                #print (pessoas2)
-                #print ("id:"+str(i.i))
-                #print(i.x)
-                #print(i.y)
-                #print (i.tracks)
-                #print (i.status)
-
-                texto.append("\n Pessoas:"+str(pessoas2))
-                texto.append('\n ID '+str(i.i))
-                texto.append("\n (CX,CY) = ("+str(i.x)+","+str(i.y)+")")
-                texto.append('\n Tracks: '+str(i.tracks))
-                texto.append('\n Status '+str(i.status))
-                texto.append(' \n \n')
-
-                ## XX EXCLUIR APOS TESTES XX ##
-                #cv2.circle(img, center, radius, color[, thickness[, lineType[, shift]]])
-                cv2.circle(img,(i.getX(),i.getY()), 5, (0,0,255), 10) #desenho a bolinha vermelha
-                pessoas2=pessoas2+1 #somo ao contador de pessoas
-
-    ## XX EXCLUIR APOS TESTES XX ##
-    print("PessoasTot"+str(pessoas2))
-    print (num_pessoas)
-    print ("pid"+str(pid))
-    texto.append('\n \n\n \n FIM DO FRAMEEEEE\n \n\n \n')
-
-    ## XX EXCLUIR APOS TESTES XX ##
-
-    texto2.append('\n Total pessoas: '+str(pessoas2))
-    texto2.append('\n Total IDs: '+str(pid))
-    texto2.append('\n Total Deteccoes: '+str(num_pessoas))
-    tempo_segundos = tempo_video/1000
-    tempo_minutos = tempo_segundos//60
-    tempo_segundos = tempo_segundos - tempo_minutos*60
-    tempo_horas = tempo_minutos//60
-    tempo_minutos = tempo_minutos - tempo_horas*60
-
-    string_tempo = str(tempo_horas) + ":"+str(tempo_minutos)+":"+str(tempo_segundos)
-
-    texto3.append(str(num_pessoas)+";"+str(pessoas2)+";"+str(pid)+";"+string_tempo+"\n")
 
     arquivo.writelines(texto)
     arquivo.close()
@@ -568,7 +440,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
     #lista_width = []
     #texto4.append(str(contours1))
     #print (contours1)
-    if (num_frame>20):
+    if (num_frame>35):
         for cnt in contours1:
             cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
             area = cv2.contourArea(cnt)
