@@ -2,7 +2,7 @@
 
 import numpy as np
 import cv2
-from autocanny import *
+#from autocanny import *
 import Person
 import time
 import sqlite3 as lite
@@ -15,6 +15,7 @@ def Pessoa_Nova(cx, new_width, cy, cur):
     
     #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
     lista = cur.fetchall()
+    print(len(lista))
     if (len(lista)>0):
         #print("eh velho")
         id_pessoa= lista[0][6]
@@ -202,6 +203,7 @@ def Imprimir_ObjetoseTracks(texto, pessoas2, i):
 
 
 def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, con):
+    print("entrei no metodo")
     it = 0 #it = iteracao
     lista_obj = []
     lista_obj_pos = []
@@ -211,8 +213,9 @@ def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
         novo, id_pessoa, id_posicao = Pessoa_Nova(cx, new_width, cy, cur)
+        print (novo)
         if (novo):
-            #print ("sounovo")
+            print ("sounovo")
             #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
             #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
             #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
@@ -227,14 +230,15 @@ def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_
             it+=new_width
 
         else:
+            print("sou velho")
             cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
             #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
-            valores_input = (None, int(new_x), int(cy), tempo_video, None, 1, id_pessoa)
+            valores_input = (None, int(cx), int(cy), tempo_video, None, 1, id_pessoa)
             cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
 
             #mask_novo = cv2.line(mask_novo, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
-            mask_novo = cv2.circle(img,(new_x,cy),5,(0,255,0),-1)
-        mask_novo = cv2.putText(mask_novo, str(id_pessoa), (new_x, cy), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
+            mask_novo = cv2.circle(img,(cx,cy),5,(0,255,0),-1)
+        mask_novo = cv2.putText(mask_novo, str(id_pessoa), (cx, cy), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
     cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
     cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
     img = cv2.add(img,mask_novo)

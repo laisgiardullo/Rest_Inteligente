@@ -4,7 +4,7 @@
 import numpy as np
 import cv2
 import math
-from autocanny import *
+#from autocanny import *
 import Person
 import time
 from FUNCTIONS import *
@@ -153,83 +153,6 @@ def Countours (img, fgbg):
                      ,1,(255,255,255),1,cv2.LINE_AA)
     return img
 
-def Countours_Area(img, fgbg, persons, pid, max_p_age, nframe, tempo_video, con):
-    arquivo = open('resultados/resultado_testes.txt', 'r')
-    texto = arquivo.readlines()
-    arquivo2 = open('resultados/resultado_testes_frame.txt', 'r')
-    texto2 = arquivo2.readlines()
-    arquivo3 = open('resultados/resultado_testes_frame_excel.txt', 'r')
-    texto3 = arquivo3.readlines()
-    texto.append('\n \n -------------------------------------------------------INICIO TESTE')
-    texto2.append('\n \n ------FRAME: '+str(nframe))
-    arquivo = open('resultados/resultado_testes.txt', 'w')
-    arquivo2 = open('resultados/resultado_testes_frame.txt', 'w')
-    arquivo3 = open('resultados/resultado_testes_frame_excel.txt', 'w')
-
-    num_pessoas = 0
-    kernelOp = np.ones((3,3),np.uint8)
-    kernelCl = np.ones((11,11),np.uint8)
-    areaTH = 100 # areaTH=area minima para considerar uma pessoa
-    i=0
-    n_cont=0
-    fgmask = fgbg.apply(img) #Use the substractor: aqui, o fundo, que nao esta mexendo, fica preto e o que esta se movimentando branco
-    try:
-
-        mask = Aplicacao_Mascara(fgmask)
-
-    except:
-        #se nao tem mais imagens para mostrar...
-        print('EOF')
-
-    #finding contours is like finding white object from black background. Object to be found should be white and background should be black.
-    #cv2.RETR_EXTERNAL means we only care about external contours (contours within contours will not be detected) tentar RETR_TREE
-    #cv2.CHAIN_APPROX_NONE is the algorithm used to make the contour
-    #########   LINK   ###########
-    #ver mais http://docs.opencv.org/3.2.0/d4/d73/tutorial_py_contours_begin.html
-    #ver hierarquia e contornos externos e internos em http://docs.opencv.org/trunk/d9/d8b/tutorial_py_contours_hierarchy.html
-
-    __, contours1, hierarchy1 = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-
-    ### XX OUTROS TESTES XX ###
-    #_, contours0, hierarchy = cv2.findContours(teste2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    ### XX OUTROS TESTES XX ###
-
-    num_contorno = 0
-
-    for cnt in contours1:
-        cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
-        area = cv2.contourArea(cnt)
-        
-        #########   LINK   ###########
-        #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
-        x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
-        if (area>areaTH):
-
-            num_contorno+=1
-
-            pp = w//31
-            if (pp==0): pp=1
-            num_pessoas = num_pessoas + pp
-
-            ### XX OUTROS TESTES XX ###
-            #if (area>500 and w>40 and w<140 and h>70 and h<180):
-            ### XX OUTROS TESTES XX ###
-
-            new_width = w/pp #calcular a nova largura de somente 1 pessoa
-            it = 0 #it = iteracao
-
-            pid = Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, nframe,tempo_video, con)
-
-
-    arquivo.writelines(texto)
-    arquivo.close()
-    arquivo2.writelines(texto2)
-    arquivo2.close()
-    arquivo3.writelines(texto3)
-    arquivo3.close()
-
-
-    return img , persons, pid
 
 def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
     #arquivos de texto para controle
@@ -440,36 +363,6 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
     #lista_width = []
     #texto4.append(str(contours1))
     #print (contours1)
-    if (num_frame>35):
-        for cnt in contours1:
-            cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
-            area = cv2.contourArea(cnt)
-            
-            #########   LINK   ###########
-            #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
-            x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
-
-            largura_media = Largura_Media(x,y)
-            if (area>areaTH):
-                #num_contorno+=1
-                pp = Qnt_Pessoas_Contorno(w, largura_media)
-                num_pessoas = num_pessoas + pp
-                new_width = w/pp #calcular a nova largura de somente 1 pessoa
-                #lista_width.append(new_width)
-                pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts,con)
-
-                    ### XX OUTROS TESTES XX ###
-                    #cv2.circle(img,(cx,cy), 5, (0,0,255), -1)           
-                    #textw = "Width " + str(new_width)
-                    #texth = "Height " + str(h)
-                    ### XX OUTROS TESTES XX ###
-        
-        #########   EXPLICACAO LOGICA   ###########
-        #Agora, vou percorrer todos os objetos de pessoas salvos e calcular o numero aproximado de pessoas baseado na media anterior
-        #con.commit()
-        num_pessoas_media = Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons)
-     
-        texto3.append(str(num_pessoas)+";"+str(num_pessoas_media)+";"+str(tempo_video)+"\n")
 
     arquivo3.writelines(texto3)
     arquivo3.close()
@@ -478,7 +371,7 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_
 
 
 
-    return img , persons, pid, novos_pts
+    return contours1
 
 def OptFlow(old_frame, frame, p0, mask):
             #fonte: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_video/py_lucas_kanade/py_lucas_kanade.html
@@ -530,3 +423,34 @@ def OptFlow(old_frame, frame, p0, mask):
     #        pass
     novos_pts = p1
     return (novos_pts, mask)
+
+def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos_pts, con, tipo_seguir):
+     ### XX OUTROS TESTES XX ###
+    #_, contours0, hierarchy = cv2.findContours(teste2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    ### XX OUTROS TESTES XX ###
+
+    #num_contorno = 0
+    #lista_width = []
+    #texto4.append(str(contours1))
+    #print (contours1)
+    for cnt in contours1:
+        cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
+        area = cv2.contourArea(cnt)
+        
+        #########   LINK   ###########
+        #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
+        x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
+
+        largura_media = Largura_Media(x,y)
+        if (area>areaTH):
+            pp = Qnt_Pessoas_Contorno(w, largura_media)
+            new_width = w/pp #calcular a nova largura de somente 1 pessoa
+            #lista_width.append(new_width)
+            if(tipo_seguir == 1):
+                pid = Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, con)
+                novos_pts = []
+            else:
+                pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts,con)
+
+
+    return img , pid, novos_pts
