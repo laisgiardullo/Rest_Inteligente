@@ -7,6 +7,8 @@ import time
 import sqlite3 as lite
 import sys
 
+from variaveis_globais import * #w_frame etc aqui
+
 cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
@@ -18,29 +20,34 @@ cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 
 
 persons = []
-max_p_age = 5
 pid = 1
 fgbg = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=255, detectShadows=True) #Create the background substractor
 nframe = 0
 old_frame = 0
 p0=[]
 p1=[]
+novos_pts = []
+
+
 con = lite.connect('Video_Intel.db')
 cur = con.cursor()
+
 
 frame_estabilizado = input("Digite o frame inicial para contagem")
 areaTH = input("Area Minima Pessoa")
 tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
-novos_pts = []
-nframe=0
+Inicializar_Quadrantes(cur)
+
+
+
 if (tipo == 1):
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (w_frame, h_frame))
         tempo_video = cap.get(0)
         #frame2 = Cascade1(frame)
         #frame2 = Countours (frame, fgbg)
-        contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, novos_pts, con)
+        contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, nframe, tempo_video, novos_pts, con)
         if(nframe>frame_estabilizado):
             #Utilizando metodo de seguir pessoas:
             frame2 , pid, novos_pts = Determinar_Pessoa(contours1, frame, areaTH, pid, nframe, tempo_video, novos_pts, con, 1)
@@ -55,7 +62,7 @@ if (tipo == 1):
             break
 elif (tipo ==2):
     ret, old_frame = cap.read() #read a frame
-    old_frame = cv2.resize(old_frame, (640, 480))
+    old_frame = cv2.resize(old_frame, (w_frame, h_frame))
     a=np.array([]) #todos x na ordem
     b=np.array([]) #todos y na ordem
     novos_pts = []
@@ -65,9 +72,9 @@ elif (tipo ==2):
     #novos_pts = novos_pts.astype(np.float32) #mudar tipo de objetos do array para float32
     while(cap.isOpened()):
         ret, frame = cap.read() #read a frame
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (w_frame, h_frame))
         tempo_video = cap.get(0)
-        contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, novos_pts, con)
+        contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, nframe, tempo_video, novos_pts, con)
         if(nframe>frame_estabilizado):
             frame2 , pid, novos_pts = Determinar_Pessoa(contours1, frame, areaTH, pid, nframe, tempo_video, novos_pts, con, 2)
 
@@ -111,7 +118,7 @@ if (tipo == 4):
         tempo_video = cap.get(0)
         #frame2 = Cascade1(frame)
         #frame2 = Countours (frame, fgbg)
-        frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
+        frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, nframe, tempo_video)
         cv2.imshow('Frame',frame2)
         nframe +=1
         #Abort and exit with 'Q' or ESC

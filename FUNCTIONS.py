@@ -6,6 +6,21 @@ import cv2
 import Person
 import time
 import sqlite3 as lite
+from variaveis_globais import *
+
+def Inicializar_Quadrantes(cur):
+    largura_quad = w_frame/raiz_n_quad
+    altura_quad = h_frame/raiz_n_quad
+    for i in range (raiz_n_quad):
+        for j in range(raiz_n_quad):
+            valores_input = (None, i, j,largura_quad*i, altura_quad*j, largura_quad, altura_quad, largura_padrao, altura_padrao)
+            cur.execute("""INSERT INTO Quadrantes VALUES (?,?,?,?,?,?,?,?,?)""", valores_input)
+
+
+#def Salvar_Largura_Altura_Quadrantes(cur):
+
+
+
 
 def Pessoa_Nova(cx, new_width, cy, cur):
     xa = 31

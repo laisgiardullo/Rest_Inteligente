@@ -10,6 +10,7 @@ import time
 from FUNCTIONS import *
 import sqlite3 as lite
 import sys
+from variaveis_globais import *
 
 
 def Cascade1 (img):
@@ -154,7 +155,7 @@ def Countours (img, fgbg):
     return img
 
 
-def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video):
+def Countours_Area_Door(img, fgbg, persons, pid, nframe, tempo_video):
     #arquivos de texto para controle
     arquivo = open('resultados/resultado_testes.txt', 'r')
     texto = arquivo.readlines()
@@ -318,7 +319,7 @@ def Countours_Area_Door(img, fgbg, persons, pid, max_p_age, nframe, tempo_video)
     return img , persons, pid
 
 #media frames:
-def Countours_Area_Pontual(img, fgbg, persons, pid, max_p_age, num_frame, tempo_video, novos_pts, con):
+def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novos_pts, con):
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
     texto3 = arquivo3.readlines()
     arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
