@@ -22,11 +22,11 @@ def Inicializar_Quadrantes(cur):
 
 
 
-def Pessoa_Nova(cx, new_width, cy, cur):
+def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
     xa = 31
     ya = 60
     limite = xa*xa+ya*ya
-    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<? AND Atual=1 ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, cx, cx, cy, cy, ))
+    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
     
     #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
     lista = cur.fetchall()
@@ -113,8 +113,8 @@ def Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tem
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur)
-        if (novo):
+        novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+        if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
             #print ("sounovo")
             #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
             #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
@@ -155,7 +155,7 @@ def Tranformar_em_Numpy(lista_posicoes):
         else: pontos_numpy = nv_pt
     return(pontos_numpy)
 
-def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, mask, frame):
+def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, mask, frame, contours1):
     mask_novo = mask
     for ponto in range (len(novos_pts)):
         
@@ -168,20 +168,33 @@ def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, c
         id_posicao = objetos_ativos[ponto][0]
         id_pessoa = objetos_ativos[ponto][6]
         #se valores forem diferentes
+        mudou = False
         if ((antigo_x!=novo_x) or (antigo_y!=novo_y)):
-            cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
-            #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
-            valores_input = (None, int(novo_x), int(novo_y), tempo_video, None, 1, id_pessoa)
-            cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
-            mask_novo = cv2.line(mask_novo, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
-            mask_novo = cv2.circle(mask_novo,(novo_x,novo_y),5,(0,255,0),-1)
+            for cnt in contours1:
+                dentro_contorno = cv2.pointPolygonTest(cnt, (novo_x, novo_y), False) 
+                if (dentro_contorno>0 and mudou==False):
+                    cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id = ?""", (tempo_video, id_posicao))
+                    #sakila.execute("SELECT first_name, last_name FROM customer WHERE last_name = ?",(last,))
+                    valores_input = (None, int(novo_x), int(novo_y), tempo_video, None, 1, id_pessoa)
+                    cur.execute("""INSERT INTO Posicao VALUES (?,?,?,?,?,?,?)""", valores_input)
+                    mudou = True
+                    mask_novo = cv2.line(mask_novo, (antigo_x,antigo_y),(novo_x,novo_y), (0,255,0), 2)
+                    mask_novo = cv2.circle(mask_novo,(novo_x,novo_y),5,(0,255,0),-1)
         mask_novo = cv2.putText(mask_novo, str(id_pessoa), (novo_x, novo_y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
     img = cv2.add(frame,mask_novo)
     cv2.imshow('frame_optflow',img)
 
     return
 
-
+def Atualizar_Status(tempo_video, cur):
+    cur.execute("""SELECT * FROM 'Posicao' WHERE (X>?-? OR X<? OR Y>?-? OR Y<?) AND Atual=1""", (w_frame, largura_padrao, largura_padrao, h_frame, altura_padrao, altura_padrao))
+    lista_fora = cur.fetchall()
+    for obj in lista_fora:
+        id_posicao_atualizar = obj[0]
+        id_pessoa_atualizar = obj[6]
+        cur.execute("""UPDATE Pessoa SET Instante_Saida = ?, Status = "out" WHERE Id=?""", (tempo_video, id_pessoa_atualizar))
+        cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Id=?""", (tempo_video, id_posicao_atualizar))
+    return
 
 def Imprimir_Novo_Objeto(texto, pid, cx, cy, num_contorno):
     ## XX EXCLUIR APOS TESTES XX ##
@@ -227,9 +240,9 @@ def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_
     for i in range (pp):
         novo = True
         new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-        novo, id_pessoa, id_posicao = Pessoa_Nova(cx, new_width, cy, cur)
+        novo, id_pessoa, id_posicao = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
         print (novo)
-        if (novo):
+        if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
             print ("sounovo")
             #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
             #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")

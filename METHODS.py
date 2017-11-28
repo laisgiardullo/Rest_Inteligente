@@ -13,6 +13,7 @@ import sys
 from variaveis_globais import *
 
 
+
 def Cascade1 (img):
     face_cascade = cv2.CascadeClassifier('\Users\Lais\Downloads\opencv\sources\data\haarcascades\haarcascade_frontalface_default.xml')
     eye_cascade = cv2.CascadeClassifier('\Users\Lais\Downloads\opencv\sources\data\haarcascades\haarcascade_eye.xml')
@@ -34,7 +35,8 @@ def Cascade1 (img):
     )
     for (xa, ya, wa, ha) in body:
         cv2.rectangle(img, (xa, ya), (xa+wa, ya+ha), (0, 255, 0), 2)
-
+        cv2.putText(img, "body" ,(xa,ya),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     lbody = lowbody_cascade.detectMultiScale(
         gray,
         scaleFactor = 1.1,
@@ -42,6 +44,8 @@ def Cascade1 (img):
     )
     for (xb, yb, wb, hb) in lbody:
         cv2.rectangle(img, (xb, yb), (xb+wb, yb+hb), (255, 255, 0), 2)
+        cv2.putText(img, "lbody" ,(xb,yb),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
 
     fbody = fullbody_cascade.detectMultiScale(
         gray,
@@ -51,28 +55,32 @@ def Cascade1 (img):
     )
     for (xc, yc, wc, hc) in fbody:
         cv2.rectangle(img, (xc, yc), (xc+wc, yc+hc), (100, 255, 0), 2)
+        cv2.putText(img, "fbody" ,(xe,ye),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     for (xd,yd,wd,hd) in faces:
         cv2.rectangle(img,(xd,yd),(xd+wd,yd+hd),(255,0,0),2)
         roi_gray = gray[yd:yd+hd, xd:xd+wd]
         roi_color = img[yd:yd+hd, xd:xd+wd]
         eyes = eye_cascade.detectMultiScale(roi_gray)
-        for (ex,ey,ew,eh) in eyes:
-            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+        cv2.putText(img, "faces" ,(xd,yd),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     hs = hs_cascade.detectMultiScale(gray, minNeighbors = 2)
     for (xe, ye, we, he) in hs:
             cv2.rectangle(img, (xe, ye), (xe+we, ye+he), (100, 100, 100), 2)
+            cv2.putText(img, "HS" ,(xe,ye),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     upb = upbody_cascade.detectMultiScale(gray, minNeighbors = 2)
     for (xf, yf, wf, hf) in upb:
         cv2.rectangle(img, (xf, yf), (xf+wf, yf+hf), (10, 25, 255), 2) #vermelho
-
+        cv2.putText(img, "UPB" ,(xf,yf),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     pfc = profile_cascade.detectMultiScale(gray, minNeighbors = 2)
     for (xg, yg, wg, hg) in pfc:
         cv2.rectangle(img, (xg, yg), (xg+wg, yg+hg), (255, 0, 255), 2) #rosa
-
+        cv2.putText(img, "pfc" ,(xg,yg),cv2.FONT_HERSHEY_SIMPLEX
+                     ,1,(255,255,255),1,cv2.LINE_AA)
     face2 = face2_cascade.detectMultiScale(gray, minNeighbors = 2)
-    for (xh, yh, wh, hh) in pfc:
-        cv2.rectangle(img, (xh, yh), (xh+wh, yh+hh), (255, 255, 0), 2) #
-
+    
     return img
 
 def Cascade (img):

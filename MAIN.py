@@ -12,6 +12,7 @@ from variaveis_globais import * #w_frame etc aqui
 cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\IMG_2409.mov')
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
@@ -52,6 +53,7 @@ if (tipo == 1):
             #Utilizando metodo de seguir pessoas:
             frame2 , pid, novos_pts = Determinar_Pessoa(contours1, frame, areaTH, pid, nframe, tempo_video, novos_pts, con, 1)
         #frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video, con, 1)
+            Atualizar_Status(tempo_video, cur)
             cv2.imshow('Frame',frame2)
         nframe +=1
         #Abort and exit with 'Q' or ESC
@@ -92,7 +94,8 @@ elif (tipo ==2):
         print("novos_pts="+str(novos_pts))
         if (novos_pts!=[] and nframe>frame_estabilizado):
             novos_pts_prox, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
-            Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, frame2, mask)
+            Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, frame2, mask, contours1)
+        Atualizar_Status(tempo_video, cur)
             #novos_pts = novos_pts_prox
         #cv2.imshow('Frame',frame2)
         nframe +=1
@@ -107,6 +110,7 @@ elif (tipo ==2):
 elif (tipo ==3):
      while(cap.isOpened()):
         ret, frame = cap.read()
+        frame = cv2.resize(frame, (w_frame, h_frame))
         frame2 = Cascade(frame)
         cv2.imshow('Frame',frame2)
         k = cv2.waitKey(30) & 0xff

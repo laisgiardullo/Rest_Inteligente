@@ -12,8 +12,10 @@ with con:
     cur.execute("CREATE TABLE Pessoa(Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)")
     cur.execute("CREATE TABLE Posicao(Id INTEGER PRIMARY KEY AUTOINCREMENT, X REAL, Y REAL, Instante_Inicial INT, Instante_Final INT, Atual INT, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
     cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)")
-    cur.execute("CREATE TABLE Medidas(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT)")
+    cur.execute("CREATE TABLE Medidas(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadrante INT, FOREIGN KEY(Quadrante) REFERENCES Quadrante(Id))")
     cur.execute("CREATE TABLE Quadrantes(Id INTEGER PRIMARY KEY AUTOINCREMENT, N_Quad_X INT, N_Quad_Y INT, X INT, Y INT, Width INT, Height INT, W_Pessoa INT, H_Pessoa INT)")
+    cur.execute("CREATE TABLE Estabelecimento(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome TEXT, Faturamento_Mensal INT, Cidade TEXT, Telefone INT)")
+    cur.execute("CREATE TABLE Objetos(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Area INT, Height INT)")
 
     #cur.execute("INSERT INTO Pessoa VALUES(1,'Audi',52642)")
 con.close
