@@ -3,15 +3,19 @@
 #ver https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.ndarray.html para numpy e https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.dtype.html
 import numpy as np
 import cv2
-import math
 #from autocanny import *
+from METHODS import *
 import Person
 import time
-from FUNCTIONS import *
 import sqlite3 as lite
 import sys
-from variaveis_globais import *
 
+from variaveis_globais import * #w_frame etc aqui
+from MatrizPixels import *
+from Deteccao import *
+from ApoioDeteccao import *
+from CaracteristicasCalculadas import *
+from Posicionamento import *
 
 
 def Cascade1 (img):
@@ -326,140 +330,3 @@ def Countours_Area_Door(img, fgbg, persons, pid, nframe, tempo_video):
 
     return img , persons, pid
 
-#media frames:
-def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novos_pts, con):
-    arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
-    texto3 = arquivo3.readlines()
-    arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
-
-    arquivo4 = open('resultados/res_numpy.txt', 'r')
-    texto4 = arquivo4.readlines()
-    arquivo4 = open('resultados/res_numpy.txt', 'w')
-
-    #inicializacao de variaveis
-    kernelOp = np.ones((3,3),np.uint8)
-    kernelCl = np.ones((11,11),np.uint8)
-    areaTH = 100 # areaTH=area minima para considerar uma pessoa
-    quantidade_frames_considerados = 8
-
-    #Inicializacao de contadores
-    num_pessoas = 0
-    i=0
-    n_cont=0
-
-    #Aplicacao do substractor
-    fgmask = fgbg.apply(img) #Use the substractor: aqui, o fundo, que nao esta mexendo, fica preto e o que esta se movimentando branco
-    try:
-        mask = Aplicacao_Mascara(fgmask)
-    except:
-        #se nao tem mais imagens para mostrar...
-        print('EOF')
-
-    #finding contours is like finding white object from black background. Object to be found should be white and background should be black.
-    #cv2.RETR_EXTERNAL means we only care about external contours (contours within contours will not be detected) tentar RETR_TREE
-    #cv2.CHAIN_APPROX_NONE is the algorithm used to make the contour
-    #########   LINK   ###########
-    #ver mais http://docs.opencv.org/3.2.0/d4/d73/tutorial_py_contours_begin.html
-    #ver hierarquia e contornos externos e internos em http://docs.opencv.org/trunk/d9/d8b/tutorial_py_contours_hierarchy.html
-
-    __, contours1, hierarchy1 = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-
-    ### XX OUTROS TESTES XX ###
-    #_, contours0, hierarchy = cv2.findContours(teste2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    ### XX OUTROS TESTES XX ###
-
-    #num_contorno = 0
-    #lista_width = []
-    #texto4.append(str(contours1))
-    #print (contours1)
-
-    arquivo3.writelines(texto3)
-    arquivo3.close()
-    arquivo4.writelines(texto4)
-    arquivo4.close()
-
-
-
-    return contours1
-
-def OptFlow(old_frame, frame, p0, mask):
-            #fonte: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_video/py_lucas_kanade/py_lucas_kanade.html
-
-    # Parameters for lucas kanade optical flow
-    lk_params = dict( winSize  = (15,15),
-                      maxLevel = 2,
-                      criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-     
-    # Create some random colors
-    #color = np.random.randint(0,255,(100,3))
-    old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # calculate optical flow
-    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-    print("p1: "+str(p1))
-
-     # Select good points
-    #good_new = p1[st==1] #status==1: flow foi encontrado
-    #good_old = p0[st==1]
-    #print("good_new:"+str(good_new))
-    #print("good_old:"+str(good_new))
-    # # draw the tracks
-
-    # #ZIP x = [1, 2, 3], y = [4, 5, 6], zip(x, y) =[(1, 4), (2, 5), (3, 6)]
-    # #ENUMERATE seasons = ['Spring', 'Summer', 'Fall', 'Winter'], list(enumerate(seasons)) = [(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
-    # # i = numero do enumerate, new = elemento do good_new, old = elemento do good_old
-    # for i,(new,old) in enumerate(zip(good_new,good_old)):
-    for i,(new,old) in enumerate(zip(p1,p0)):
-        a,b = new.ravel() #ravel: A 1-D array, containing the elements of the input, is returned
-        c,d = old.ravel()
-        #if((a,b)!=(c,d)):
-        mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
-        frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
-
-    img = cv2.add(frame,mask)
-
-    cv2.imshow('frame_22',img)
-
-    # # Now update the previous frame and previous points
-    old_gray = frame_gray.copy()
-    # #p0 = good_new.reshape(-1,1,2)
-    #if(len(good_new)==len(p1)):
-    #    try:
-    #        print("gnr:"+str(good_new.reshape(-1,1,2)))
-    #        good_new = good_new.reshape(-1,1,2) #voltar ao formato original de p0
-    #        novos_pts = good_new
-    #    except:
-    #        pass
-    novos_pts = p1
-    return (novos_pts, mask)
-
-def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos_pts, con, tipo_seguir):
-     ### XX OUTROS TESTES XX ###
-    #_, contours0, hierarchy = cv2.findContours(teste2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    ### XX OUTROS TESTES XX ###
-
-    #num_contorno = 0
-    #lista_width = []
-    #texto4.append(str(contours1))
-    #print (contours1)
-    for cnt in contours1:
-        cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
-        area = cv2.contourArea(cnt)
-        
-        #########   LINK   ###########
-        #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
-        x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
-
-        largura_media = Largura_Media(x,y)
-        if (area>areaTH):
-            pp = Qnt_Pessoas_Contorno(w, largura_media)
-            new_width = w/pp #calcular a nova largura de somente 1 pessoa
-            #lista_width.append(new_width)
-            if(tipo_seguir == 1):
-                pid = Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, con)
-                novos_pts = []
-            else:
-                pid, novos_pts = Salvar_Mostrar_PessoaPontual(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts,con)
-
-
-    return img , pid, novos_pts

@@ -3,91 +3,20 @@
 import numpy as np
 import cv2
 #from autocanny import *
+from METHODS import *
 import Person
 import time
 import sqlite3 as lite
-from variaveis_globais import *
+import sys
 
-def Inicializar_Quadrantes(cur):
-    largura_quad = w_frame/raiz_n_quad
-    altura_quad = h_frame/raiz_n_quad
-    for i in range (raiz_n_quad):
-        for j in range(raiz_n_quad):
-            valores_input = (None, i, j,largura_quad*i, altura_quad*j, largura_quad, altura_quad, largura_padrao, altura_padrao)
-            cur.execute("""INSERT INTO Quadrantes VALUES (?,?,?,?,?,?,?,?,?)""", valores_input)
-
-
-#def Salvar_Largura_Altura_Quadrantes(cur):
+from variaveis_globais import * #w_frame etc aqui
+from MatrizPixels import *
+from Deteccao import *
+from ApoioDeteccao import *
+from CaracteristicasCalculadas import *
+from Posicionamento import *
 
 
-
-
-def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
-    xa = 31
-    ya = 60
-    limite = xa*xa+ya*ya
-    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
-    
-    #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
-    lista = cur.fetchall()
-    print(len(lista))
-    if (len(lista)>0):
-        #print("eh velho")
-        id_pessoa= lista[0][6]
-        id_posicao=lista[0][0]
-        novo = False
-    else:
-        novo = True
-        id_pessoa= None
-        id_posicao=None
-    return (novo, id_pessoa, id_posicao)
-
-def Largura_Media(x, y):
-    largura_media = 31
-    return (largura_media)
-
-def Qnt_Pessoas_Contorno (w, largura_media):
-    pp = w//largura_media
-    if (pp==0):
-        pp=1
-    return (pp)
-
-def Atualizar_Retangulo(x, y, h, new_width, it):
-    new_x = x+it #novo valor de x, caso seja mais de 1 pessoa 
-    cx = new_x + (new_width/2) #cx = o centro do retangulo da pessoa, em x
-    cy = y + (h/2) #cy = o centro do retangulo da pessoa, em y
-    return (new_x, cx, cy)
-
-def Aplicacao_Mascara(fgmask):
-    kernelOp = np.ones((3,3),np.uint8)
-    kernelCl = np.ones((11,11),np.uint8)
-    #########   EXPLICACAO LOGICA    ###########
-    #Vamos aplicar a mascara 
-    #########   EXPLICACAO FUNCAO   ###########
-    #threshold: If pixel value is greater than a threshold value, it is assigned one value (may be white), else it is assigned another value (may be black).First argument is the source image, which should be a grayscale image. Second argument is the threshold value which is used to classify the pixel values. Third argument is the maxVal which represents the value to be given if pixel value is more than (sometimes less than) the threshold value. OpenCV provides different styles of thresholding and it is decided by the fourth parameter of the function.
-    #Adaptive thresholding: In this, the algorithm calculate the threshold for a small regions of the image. So we get different thresholds for different regions of the same image and it gives us better results for images with varying illumination.
-    #########   LINK   ###########
-    #ver http://docs.opencv.org/trunk/d7/d4d/tutorial_py_thresholding.html
-    imBin = cv2.adaptiveThreshold(fgmask,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-        cv2.THRESH_BINARY_INV,11,2)
-
-    ### XX OUTROS TESTES XX ###
-    #ret,imBin = cv2.threshold(fgmask,127,255,cv2.THRESH_BINARY)
-    #imBin2 = cv2.adaptiveThreshold(teste2,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-    #    cv2.THRESH_BINARY_INV,11,2)
-    #Opening (erode->dilate) para tirar ruido.
-    ### XX OUTROS TESTES XX ###
-
-    mask = cv2.morphologyEx(imBin, cv2.MORPH_OPEN, kernelOp)
-
-    ### XX OUTROS TESTES XX ###
-    #mask2 = cv2.morphologyEx(teste2, cv2.MORPH_OPEN, kernelOp)
-    #Closing (dilate -> erode) para juntar regioes brancas.
-    #mask2 =  cv2.morphologyEx(mask2 , cv2.MORPH_CLOSE, kernelCl)
-    ### XX OUTROS TESTES XX ###
-
-    mask =  cv2.morphologyEx(mask , cv2.MORPH_CLOSE, kernelCl)
-    return (mask)
 
 def Media_Pessoas_Frames(quantidade_frames_considerados, num_frame, persons):
     num_frame_maximo = num_frame - quantidade_frames_considerados # faco a media com os ultimos 8 frames
@@ -273,3 +202,42 @@ def Salvar_Mostrar_PessoaMet1(img, pid, pp, x, y, h, new_width, num_frame,tempo_
     cv2.imshow('frame_optflow',img)
 
     return (pid)
+
+def Salvar_Mostrar_PessoaCnt(img, pid, pp, x, y, h, new_width, num_frame,tempo_video, novos_pts, con, cnt):
+    it = 0 #it = iteracao
+    lista_obj = []
+    lista_obj_pos = []
+    cur = con.cursor()
+    for i in range (pp):
+        novo = True
+        new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
+        novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+        if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
+            #print ("sounovo")
+            #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
+            #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
+            #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
+
+            lista_obj.append((pid,'in',new_width,tempo_video, None))
+            lista_obj_pos.append((None, cx, cy, tempo_video, None, 1, pid))
+
+            #persons.append(p)
+            pid += 1
+            #########   EXPLICACAO LOGICA   ###########
+            ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
+            img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
+            it+=new_width
+            pa = np.array ([[cx]])
+            pb = np.array ([[cy]])
+            nv_pt = np.dstack((pa,pb))
+            nv_pt = nv_pt.astype(np.float32)
+            if (num_frame>20): #so comeca a guardar depois do 21 que eh quando estabiliza o background
+                if (novos_pts !=[]):
+                    novos_pts = np.append(novos_pts,nv_pt, axis = 0)
+                else: novos_pts = nv_pt
+    if (lista_obj!=[]):
+        with con:
+            cur = con.cursor()
+            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+            cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+    return (pid, novos_pts)
