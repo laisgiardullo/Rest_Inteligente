@@ -71,10 +71,15 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novo
 
 
 def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
-    xa = 31
-    ya = 60
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (cx, cx, cy, cy,))
+    quadrante = cur.fetchall()
+    quadrante_id = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    medida = (cur.fetchall())[0]
+    xa = medida[1]
+    ya = medida[2]
     limite = xa*xa+ya*ya
-    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
+    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<=? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
     
     #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
     lista = cur.fetchall()
@@ -107,7 +112,7 @@ def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos
         #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
         x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
 
-        largura_media = Largura_Media(x,y)
+        largura_media = Largura_Media(x,y, cur)
         if (area>areaTH):
             pp = Qnt_Pessoas_Contorno(w, largura_media)
             new_width = w/pp #calcular a nova largura de somente 1 pessoa
@@ -133,7 +138,7 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
         #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
         x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
 
-        largura_media = Largura_Media(x,y)
+        largura_media = Largura_Media(x,y, cur)
         if (area>areaTH):
             pp = Qnt_Pessoas_Contorno(w, largura_media)
             new_width = w/pp #calcular a nova largura de somente 1 pessoa
@@ -167,6 +172,9 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
                     #    if (novos_pts !=[]):
                     #        novos_pts = np.append(novos_pts,nv_pt, axis = 0)
                     #    else: novos_pts = nv_pt
+                else:
+                    #Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur)
+                    pass
             if (lista_obj!=[]):
                 with con:
                     cur = con.cursor()

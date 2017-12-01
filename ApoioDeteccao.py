@@ -75,26 +75,23 @@ def Salvar_PontoAtualInterno(new_width, h, cnt, pid, new_x, y, cur):
     cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
     return
 
-def Atualizar_PontosAtuaisInternos(matriz_flow, cur, img):
-    cur.execute("""SELECT * FROM 'PontoAtualInterno'""")
-    lista_pontos = cur.fetchall()
-    mask = np.zeros_like(img)
-    for ponto in lista_pontos:
-        x_ant = ponto[2]
-        y_ant = ponto[3]
-
-        deslocamento_x = matriz_flow[int(y_ant)][int(x_ant)][0]
-        deslocamento_y = matriz_flow[int(y_ant)][int(x_ant)][1]
-
-        x_prox = x_ant + deslocamento_x
-        y_prox = y_ant + deslocamento_y
-
-        cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ? WHERE Id = ?""", (x_prox, y_prox, ponto[0]))
-    
-        mask = cv2.line(mask, (int(x_ant),int(y_ant)),(int(x_prox),int(y_prox)), (0,255,0), 2)
-        mask = cv2.putText(mask, "AQUI", (int(x_prox),int(y_prox)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
-        mask = cv2.circle(mask,(int(x_prox),int(y_prox)),5,(0,255,0),-1)
-    frame2 = cv2.add(img,mask)
-    cv2.imshow('flow',frame2)
+def Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur):
+    lista_objetos = []
+    for i in range (new_width):
+        for j in range (h):
+            no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
+            x_salvar = new_x+i
+            y_salvar = y+j
+            if (no_contorno>=0):
+                cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X = ? AND Y=? AND Pessoa_id=?""", (x_salvar, y_salvar, pessoax,))
+                lista_ponto = cur.fetchall()
+                if(len(lista_ponto)==0):
+                    if (no_contorno==0):
+                        lista_objetos.append((None, 1, x_salvar,y_salvar, pessoax))
+                    if (no_contorno>0):
+                        lista_objetos.append((None, 0, x_salvar,y_salvar, pessoax))
+            j+=3
+            i+=3
+    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
     return
                     

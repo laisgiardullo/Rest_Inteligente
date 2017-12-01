@@ -222,7 +222,7 @@ def Countours_Area_Door(img, fgbg, persons, pid, nframe, tempo_video):
         #########   LINK   ###########
         #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
         x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
-        largura_media = Largura_Media(x,y)
+        largura_media = Largura_Media(x,y, cur)
         if (area>areaTH):
 
             num_contorno+=1

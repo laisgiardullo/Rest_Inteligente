@@ -6,6 +6,8 @@ import Person
 import time
 import sqlite3 as lite
 import sys
+import datetime
+
 
 from variaveis_globais import * #w_frame etc aqui
 from MatrizPixels import *
@@ -13,12 +15,13 @@ from Deteccao import *
 from ApoioDeteccao import *
 from CaracteristicasCalculadas import *
 from Posicionamento import *
+from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
-cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\IMG_2409.mov')
-#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
@@ -46,6 +49,23 @@ salto_Opt_Flow = input("Digite de quantos em quantos quadros voce deseja fazer o
 
 Inicializar_Quadrantes(cur)
 
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+ret, frame = cap.read()
+
+frame = cv2.resize(frame, (w_frame, h_frame))
+
+DesenharPessoas(frame, cur)
+Salvar_MedidaFinal(cur)
 
 
 if (tipo == 1):
@@ -143,6 +163,9 @@ elif (tipo ==5):
     mask = np.zeros_like(old_frame)
     lista = []
     while(cap.isOpened()):
+        now = datetime.datetime.now()
+        now_id = Salvar_DataHora(now, cur)
+
         ret, frame = cap.read() #read a frame
         frame = cv2.resize(frame, (w_frame, h_frame))
         tempo_video = cap.get(0)
@@ -153,7 +176,11 @@ elif (tipo ==5):
                 matriz_flow = OptFlowDense(old_frame, frame)
                 old_frame = frame
                 Atualizar_PontosAtuaisInternos(matriz_flow, cur, frame)
-                #Atualizar_PosicoesFlow()
+                Limpar_PontosPerdidos(cur)
+                #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
+                Atualizar_PosicoesFlow(cur, tempo_video, frame)
+
+                SalvarNumPessoasTotal(now_id, cur)
 
 
 

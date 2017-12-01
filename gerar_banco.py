@@ -10,7 +10,7 @@ with con:
     
     cur = con.cursor()
     #Timestamping
-    cur.execute("CREATE TABLE DataHora(Id INTEGER PRIMARY KEY AUTOINCREMENT, Dia INT, Mes INT, Ano INT, Hora INT, Minutos INT, Segundos INT)")
+    cur.execute("CREATE TABLE DataHora(Id INTEGER PRIMARY KEY AUTOINCREMENT, Dia INT, Mes INT, Ano INT, Hora INT, Minutos INT, Segundos INT, Milissegundos INT)")
     
     #Matriz Imagem Automaticos
     #cur.execute("CREATE TABLE Pixel(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT)")
@@ -23,16 +23,16 @@ with con:
     cur.execute("CREATE TABLE PontoAtualInterno(Id INTEGER PRIMARY KEY AUTOINCREMENT,EhContorno INT, X REAL, Y REAL, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
 
     #Calibracao do Usuario
-    cur.execute("CREATE TABLE MedidaParcial(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadrante INT, FOREIGN KEY(Quadrante) REFERENCES Quadrante(Id))")
+    cur.execute("CREATE TABLE MedidaParcial(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadrante_id INT, FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
     cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome INT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)") #tipo = tracking, fila ou ignorar
     
     #Calculos
     #medida por quadrante
-    cur.execute("CREATE TABLE MedidaFinal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Width INT, Height INT, Quadrante INT, FOREIGN KEY(Quadrante) REFERENCES Quadrante(Id))")
+    cur.execute("CREATE TABLE MedidaFinal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Width INT, Height INT, Quadrante_id INT, FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
     #numero de pessoas
     cur.execute("CREATE TABLE NumeroPessoasQuadrante(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, Quadrante_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id), FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
     cur.execute("CREATE TABLE NumeroPessoasLocal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, Local_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id), FOREIGN KEY(Local_id) REFERENCES Local(Id))")
-    
+    cur.execute("CREATE TABLE NumeroPessoasTotal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id))")
 
     #cur.execute("CREATE TABLE Estabelecimento(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome TEXT, Faturamento_Mensal INT, Cidade TEXT, Telefone INT)")
 con.commit()
