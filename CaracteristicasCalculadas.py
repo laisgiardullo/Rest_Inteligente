@@ -23,6 +23,15 @@ def Largura_Media(x, y, cur):
     largura_media = medida[1]
     return (largura_media)
 
+def Altura_Media(x, y, cur):
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
+    quadrante = cur.fetchall()
+    quadrante_id = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    medida = (cur.fetchall())[0]
+    altura_media = medida[2]
+    return (altura_media)
+
 def Salvar_DataHora(now, cur):
     ano = now.year
     mes = now.month

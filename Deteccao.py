@@ -76,8 +76,12 @@ def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
     quadrante_id = quadrante[0][0]
     cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
     medida = (cur.fetchall())[0]
-    xa = medida[1]
-    ya = medida[2]
+    #xa = medida[1]
+    #ya = medida[2]
+    xa = largura_padrao
+    ya = altura_padrao
+
+
     limite = xa*xa+ya*ya
     cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<=? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
     
@@ -94,6 +98,81 @@ def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
         id_pessoa= None
         id_posicao=None
     return (novo, id_pessoa, id_posicao)
+
+
+def Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y):
+    novo = True
+    id_pessoa= None
+    id_posicao=None
+
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (cx, cx, cy, cy,))
+    quadrante = cur.fetchall()
+    quadrante_id = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    medida = (cur.fetchall())[0]
+    xa = medida[1]
+    ya = medida[2]
+    limite = xa*xa+ya*ya
+    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<=? AND Atual=1 AND Instante_Inicial!=? ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (cx, cx, cy, cy, limite, tempo_video, cx, cx, cy, cy, ))
+    
+    #cur.execute("""SELECT * FROM 'Posicao' WHERE ((abs(?-X)<? OR abs(?-Y)<120) AND Atual=1) ORDER BY abs(?-X)""", (cx, new_width, cy, cx ))
+    lista = cur.fetchall()
+    print(len(lista))
+    if (len(lista)>0):
+        #print("eh velho")
+        id_pessoa= lista[0][6]
+        id_posicao=lista[0][0]
+        novo = False
+    else:
+        for i in range (new_width):
+            for j in range (h):
+                if (novo):
+                    no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
+                    if (novo and no_contorno>=0):
+                        x_salvar = new_x+i
+                        y_salvar = y+j
+                        cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-1<? AND X+1>? AND Y-1<? AND Y+1>?""", (x_salvar,x_salvar,y_salvar,y_salvar,))
+                        lista_pontos = cur.fetchall()
+                        if (len(lista_pontos)!=0):
+                            novo = False
+                            id_pessoa = lista_pontos[0][4]
+                            cur.execute("""SELECT * FROM 'Posicao' WHERE Pessoa_id = ?""", (id_pessoa,))
+                            id_posicao = (cur.fetchall())[0][0]
+
+    return (novo, id_pessoa, id_posicao)
+
+def Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur):
+    lista_objetos = []
+    novo = True
+    lista_pontos = []
+    id_pessoa = None
+    for i in range (new_width):
+        for j in range (h):
+            no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
+            if (novo and no_contorno>=0):
+                x_salvar = new_x+i
+                y_salvar = y+j
+                cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-1<? AND X+1>? AND Y-1<? AND Y+1>?""", (x_salvar,x_salvar,y_salvar,y_salvar))
+                lista_pontos = cur.fetchall()
+            if (len(lista_pontos)==0 or novo==False):
+                if (no_contorno>=0):
+                    x_salvar = new_x+i
+                    y_salvar = y+j
+                    if (no_contorno==0):
+                        lista_objetos.append([None, 1, x_salvar,y_salvar, pid])
+                    if (no_contorno>0):
+                        lista_objetos.append([None, 0, x_salvar,y_salvar, pid])
+                    j+=3
+                    i+=3
+            else:
+                novo = False
+                id_pessoa = lista_pontos[0][4]
+    if (novo == False):
+        for obj in lista_objetos:
+            obj[4] = id_pessoa
+
+    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
+    return (novo, id_pessoa)
 
 def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos_pts, con, tipo_seguir):
      ### XX OUTROS TESTES XX ###
@@ -125,7 +204,65 @@ def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos
 
     return img , pid, novos_pts
 
+def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video, con):
+    cur = con.cursor()
+    for cnt in contours1:
+        cv2.drawContours(img, cnt, -1, (0,255,0), 0, 8)
+        area = cv2.contourArea(cnt)
+        
+        #########   LINK   ###########
+        #ver http://docs.opencv.org/trunk/dd/d49/tutorial_py_contour_features.html
+        x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
 
+        largura_media = Largura_Media(x,y, cur)
+        if (area>areaTH):
+            pp = Qnt_Pessoas_Contorno(w, largura_media)
+            new_width = w/pp #calcular a nova largura de somente 1 pessoa
+            it = 0 #it = iteracao
+            lista_obj = []
+            lista_obj_pos = []
+            cur = con.cursor()
+            for i in range (pp):
+                novo = True
+                new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
+                novo, pessoax = Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur)
+                #novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+                #if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
+                if (novo): 
+                    #print ("sounovo")
+                    #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
+                    #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
+                    #obj_pessoa = (Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)
+
+                    lista_obj.append((pid,'in',new_width,tempo_video, None))
+                    lista_obj_pos.append((None, cx, cy, tempo_video, None, 1, pid))
+                    #Salvar_PontoAtualInterno(new_width, h, cnt, pid, new_x, y, cur)
+                    pid += 1
+                    #########   EXPLICACAO LOGICA   ###########
+                    ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
+                    img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
+                    it+=new_width
+                    #pa = np.array ([[cx]])
+                    #pb = np.array ([[cy]])
+                    #nv_pt = np.dstack((pa,pb))
+                    #nv_pt = nv_pt.astype(np.float32)
+                    #if (num_frame>20): #so comeca a guardar depois do 21 que eh quando estabiliza o background
+                    #    if (novos_pts !=[]):
+                    #        novos_pts = np.append(novos_pts,nv_pt, axis = 0)
+                    #    else: novos_pts = nv_pt
+                    if (lista_obj!=[]):
+                        with con:
+                            cur = con.cursor()
+                            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+                            cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+                            lista_obj=[]
+                            lista_obj_pos=[]
+                    else:
+                        #Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur)
+                        pass
+
+
+    return img , pid
 
 
 def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video, con):
@@ -149,7 +286,8 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
             for i in range (pp):
                 novo = True
                 new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-                novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+                #novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+                novo, pessoax, posicaox = Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y)
                 if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
                     #print ("sounovo")
                     #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
@@ -172,13 +310,16 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
                     #    if (novos_pts !=[]):
                     #        novos_pts = np.append(novos_pts,nv_pt, axis = 0)
                     #    else: novos_pts = nv_pt
-                else:
-                    #Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur)
-                    pass
-            if (lista_obj!=[]):
-                with con:
-                    cur = con.cursor()
-                    cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
-                    cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+                    if (lista_obj!=[]):
+                        with con:
+                            cur = con.cursor()
+                            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+                            cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+                            lista_obj=[]
+                            lista_obj_pos=[]
+                    else:
+                        #Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur)
+                        pass
+
 
     return img , pid

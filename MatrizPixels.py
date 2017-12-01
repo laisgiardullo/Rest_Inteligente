@@ -40,6 +40,18 @@ def Media_Medidas(lista_medidas):
     altura=altura/len(lista_medidas)
     return largura, altura
 
+def TotalMedidaFinal(cur):
+    cur.execute("""SELECT * FROM 'MedidaParcial'""")
+    lista_medidas = cur.fetchall()
+    largura = 0
+    altura = 0
+    for medida in lista_medidas:
+        largura+=medida[3]
+        altura+=medida[4]
+    largura=largura/len(lista_medidas)
+    altura=altura/len(lista_medidas)
+    return largura, altura
+
 
 def Salvar_MedidaFinal(cur):
     cur.execute("""SELECT * FROM 'Quadrantes'""")

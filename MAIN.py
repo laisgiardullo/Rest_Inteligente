@@ -19,9 +19,11 @@ from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
-#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
-#cap = cv2.VideoCapture('videos\IMG_2409.mov')
+#cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
+#cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
 cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\IMG_2409.mov')
+#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
@@ -66,7 +68,9 @@ frame = cv2.resize(frame, (w_frame, h_frame))
 
 DesenharPessoas(frame, cur)
 Salvar_MedidaFinal(cur)
+largurafinal_geral,alturafinal_geral  = TotalMedidaFinal(cur)
 
+areaTH = (largurafinal_geral*alturafinal_geral)/2
 
 if (tipo == 1):
     while(cap.isOpened()):
@@ -158,6 +162,7 @@ elif (tipo == 4):
         if k == 27:
             break
 elif (tipo ==5):
+    matriz_flow = None
     ret, old_frame = cap.read() #read a frame
     old_frame = cv2.resize(old_frame, (w_frame, h_frame))
     mask = np.zeros_like(old_frame)
@@ -173,9 +178,9 @@ elif (tipo ==5):
         if(nframe>frame_estabilizado):
             frame2 , pid = Comparar_e_Salvar_Novos(contours1, frame, areaTH, pid, nframe, tempo_video, con)
             if (nframe%salto_Opt_Flow==0):
-                matriz_flow = OptFlowDense(old_frame, frame)
+                matriz_flow = OptFlowDense(old_frame, frame, matriz_flow)
                 old_frame = frame
-                Atualizar_PontosAtuaisInternos(matriz_flow, cur, frame)
+                Atualizar_PontosAtuaisInternos(matriz_flow, cur, frame, tempo_video)
                 Limpar_PontosPerdidos(cur)
                 #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
                 Atualizar_PosicoesFlow(cur, tempo_video, frame)
