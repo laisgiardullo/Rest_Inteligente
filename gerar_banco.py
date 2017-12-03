@@ -4,7 +4,7 @@
 import sqlite3 as lite
 import sys
 
-con = lite.connect('Video_Intel.db')
+con = lite.connect(r'GUI\video_inteligente_gui\db.sqlite3')
 
 with con:
     
@@ -23,14 +23,14 @@ with con:
     cur.execute("CREATE TABLE PontoAtualInterno(Id INTEGER PRIMARY KEY AUTOINCREMENT,EhContorno INT, X REAL, Y REAL, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
 
     #Calibracao do Usuario
-    cur.execute("CREATE TABLE MedidaParcial(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadrante_id INT, FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
+    cur.execute("CREATE TABLE MedidaParcial(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadranteid INT, FOREIGN KEY(Quadranteid) REFERENCES Quadrante(Id))")
     cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome INT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)") #tipo = tracking, fila ou ignorar
     
     #Calculos
     #medida por quadrante
-    cur.execute("CREATE TABLE MedidaFinal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Width INT, Height INT, Quadrante_id INT, FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
+    cur.execute("CREATE TABLE MedidaFinal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Width INT, Height INT, Quadranteid INT, FOREIGN KEY(Quadranteid) REFERENCES Quadrante(Id))")
     #numero de pessoas
-    cur.execute("CREATE TABLE NumeroPessoasQuadrante(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, Quadrante_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id), FOREIGN KEY(Quadrante_id) REFERENCES Quadrante(Id))")
+    cur.execute("CREATE TABLE NumeroPessoasQuadrante(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, Quadranteid INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id), FOREIGN KEY(Quadranteid) REFERENCES Quadrante(Id))")
     cur.execute("CREATE TABLE NumeroPessoasLocal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, Local_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id), FOREIGN KEY(Local_id) REFERENCES Local(Id))")
     cur.execute("CREATE TABLE NumeroPessoasTotal(Id INTEGER PRIMARY KEY AUTOINCREMENT, Num_de_Pessoas INT, DataHora_id INT, FOREIGN KEY(DataHora_id) REFERENCES DataHora(Id))")
 

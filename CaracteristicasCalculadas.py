@@ -17,8 +17,8 @@ from Posicionamento import *
 def Largura_Media(x, y, cur):
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
     quadrante = cur.fetchall()
-    quadrante_id = quadrante[0][0]
-    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    Quadranteid = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     largura_media = medida[1]
     return (largura_media)
@@ -26,8 +26,8 @@ def Largura_Media(x, y, cur):
 def Altura_Media(x, y, cur):
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
     quadrante = cur.fetchall()
-    quadrante_id = quadrante[0][0]
-    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    Quadranteid = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     altura_media = medida[2]
     return (altura_media)

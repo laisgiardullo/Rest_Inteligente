@@ -85,13 +85,45 @@ def draw_rect(event,x,y,flags,param):
             cv2.rectangle(param[0],(ix,iy),(x,y),(0,255,0),-1)
             SalvarMedidaParcial(ix, iy, x, y, param[1])
 
+def draw_areasdeteccao(event,x,y,flags,param):
+    global ix,iy,drawing,mode
+    #primeiro ponto
+    if event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        ix,iy = x,y
+    #enquanto mouse se move
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if drawing == True:
+            cv2.rectangle(param[0],(ix,iy),(x,y),(0,0,255),-1)
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        drawing = False
+        if mode == True:
+            cv2.rectangle(param[0],(ix,iy),(x,y),(0,0,255),-1)
+            SalvarAreaDeteccao(ix, iy, x, y, param[1])
+
+def draw_areasdescarte(event,x,y,flags,param):
+    global ix,iy,drawing,mode
+    #primeiro ponto
+    if event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        ix,iy = x,y
+    #enquanto mouse se move
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if drawing == True:
+            cv2.rectangle(param[0],(ix,iy),(x,y),(255,0,0),-1)
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        drawing = False
+        if mode == True:
+            cv2.rectangle(param[0],(ix,iy),(x,y),(255,0,0),-1)
+            SalvarAreaDescarte(ix, iy, x, y, param[1])
+
 def SalvarMedidaParcial(ix, iy, x, y, cur):
     x_meio = (ix+x)/2
     y_meio = (iy+y)/2
     Width_p = abs(x-ix)
     Height_p = abs(y-iy)
-    print(x_meio)
-    print(y_meio)
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x_meio, x_meio, y_meio, y_meio,))
     quadrante = cur.fetchall()
     print(quadrante)
@@ -101,6 +133,23 @@ def SalvarMedidaParcial(ix, iy, x, y, cur):
     cur.execute("""INSERT INTO MedidaParcial VALUES (?,?,?,?,?,?)""", valores_input)
     return
 
+def SalvarAreaDeteccao(ix, iy, x, y, cur):
+    nome = "detect"+str(ix)+","+str(iy)
+    tipo = "fila"
+    Width = abs(x-ix)
+    Height = abs(y-iy)
+    valores_input = (None, nome, tipo, ix, iy, Width, Height)
+    cur.execute("""INSERT INTO Local VALUES (?,?,?,?,?,?,?)""", valores_input)
+    return
+
+def SalvarAreaDescarte(ix, iy, x, y, cur):
+    nome = "descarte"+str(ix)+","+str(iy)
+    tipo = "ignorar"
+    Width = abs(x-ix)
+    Height = abs(y-iy)
+    valores_input = (None, nome, tipo, ix, iy, Width, Height)
+    cur.execute("""INSERT INTO Local VALUES (?,?,?,?,?,?,?)""", valores_input)
+    return
 
 
 
@@ -112,13 +161,48 @@ def SalvarMedidaParcial(ix, iy, x, y, cur):
 
 def DesenharPessoas(image, cur):
     #image = np.zeros((512,512,3), np.uint8)
-    cv2.namedWindow('image')
+    cv2.namedWindow('Desenhar Pessoas')
     #pontos_linhas = cv2.setMouseCallback('image',draw_lines,pontos_linhas)
     parametros = [image, cur]
-    cv2.setMouseCallback('image',draw_rect, parametros)
+    cv2.setMouseCallback('Desenhar Pessoas',draw_rect, parametros)
 
     while(1):
-        cv2.imshow('image',image)
+        cv2.imshow('Desenhar Pessoas',image)
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('m'):
+            mode = not mode
+        elif k == 27:
+            break
+
+    cv2.destroyAllWindows()
+
+def DesenharAreasDeteccao(image, cur):
+    #image = np.zeros((512,512,3), np.uint8)
+    cv2.namedWindow('Areas Filas')
+    #pontos_linhas = cv2.setMouseCallback('image',draw_lines,pontos_linhas)
+    parametros = [image, cur]
+    cv2.setMouseCallback('Areas Filas',draw_areasdeteccao, parametros)
+
+    while(1):
+        cv2.imshow('Areas Filas',image)
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('m'):
+            mode = not mode
+        elif k == 27:
+            break
+
+    cv2.destroyAllWindows()
+
+
+def DesenharAreasDescarte(image, cur):
+    #image = np.zeros((512,512,3), np.uint8)
+    cv2.namedWindow('Areas Descarte')
+    #pontos_linhas = cv2.setMouseCallback('image',draw_lines,pontos_linhas)
+    parametros = [image, cur]
+    cv2.setMouseCallback('Areas Descarte',draw_areasdescarte, parametros)
+
+    while(1):
+        cv2.imshow('Areas Descarte',image)
         k = cv2.waitKey(1) & 0xFF
         if k == ord('m'):
             mode = not mode

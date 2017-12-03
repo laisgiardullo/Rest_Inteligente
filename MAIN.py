@@ -18,10 +18,12 @@ from Posicionamento import *
 from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
+#cap = cv2.VideoCapture(r'videos\armarios_biblio.mov') #Open video file
 #cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
-#cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
+cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
 #cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
-cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Chinese_Rest.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\IMG_2409.mov')
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
@@ -40,7 +42,7 @@ p1=[]
 novos_pts = []
 
 
-con = lite.connect('Video_Intel.db')
+con = lite.connect(r'GUI\video_inteligente_gui\db.sqlite3')
 cur = con.cursor()
 
 
@@ -67,6 +69,11 @@ ret, frame = cap.read()
 frame = cv2.resize(frame, (w_frame, h_frame))
 
 DesenharPessoas(frame, cur)
+
+DesenharAreasDeteccao(frame, cur)
+
+DesenharAreasDescarte(frame, cur)
+
 Salvar_MedidaFinal(cur)
 largurafinal_geral,alturafinal_geral  = TotalMedidaFinal(cur)
 

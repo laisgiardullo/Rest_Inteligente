@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Fresh Restaurant</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+<!-- ImageReady Preload Script (index.psd) -->
+<script type="text/javascript">
+<!--
+function newImage(arg) {
+if (document.images) {
+rslt = new Image();
+rslt.src = arg;
+return rslt;
+}
+}
+function changeImages() {
+if (document.images && (preloadFlag == true)) {
+for (var i=0; i<changeImages.arguments.length; i+=2) {
+document[changeImages.arguments[i]].src = changeImages.arguments[i+1];
+}
+}
+}
+var preloadFlag = false;
+function preloadImages() {
+if (document.images) {
+home_page_over = newImage("images/home-page-over.jpg");
+about_us_over = newImage("images/about-us-over.jpg");
+location_over = newImage("images/location-over.jpg");
+menu_over = newImage("images/menu-over.jpg");
+contacts_over = newImage("images/contacts-over.jpg");
+preloadFlag = true;
+}
+}
+// -->
+</script><!-- End Preload Script -->
+<link href="../../static/template_rest/html/css/styles.css" rel="stylesheet" type="text/css">
+</head>
+<body leftmargin="0" topmargin="0" onload="preloadImages();" style="background-color: rgb(255, 255, 255);" marginheight="0" marginwidth="0">
+
+<center>
+<!-- ImageReady Slices (index.psd) -->
+<table border="0" cellpadding="0" cellspacing="0" width="775">
+<tbody>
+<tr>
+<td colspan="5"> <img src="../../static/template_rest/html/images/m1.jpg" alt="" height="93" width="313"></td>
+<td colspan="2"> <a href="#" onmouseover="window.status='home page'; changeImages('home_page', '../../static/template_rest/html/images/home-page-over.jpg'); return true;" onmouseout="window.status=''; changeImages('home_page', '../../static/template_rest/html/images/home-page.jpg'); return true;">
+<img name="home_page" src="../../static/template_rest/html/images/home-page.jpg" alt="home page" border="0" height="93" width="95"></a></td>
+<td colspan="2"> <a href="#" onmouseover="window.status='about us'; changeImages('about_us', '../../static/template_rest/html/images/about-us-over.jpg'); return true;" onmouseout="window.status=''; changeImages('about_us', '../../static/template_rest/html/images/about-us.jpg'); return true;">
+<img name="about_us" src="../../static/template_rest/html/images/about-us.jpg" alt="about us" border="0" height="93" width="92"></a></td>
+<td colspan="3"> <a href="#" onmouseover="window.status='location'; changeImages('location', '../../static/template_rest/html/images/location-over.jpg'); return true;" onmouseout="window.status=''; changeImages('location', '../../static/template_rest/html/images/location.jpg'); return true;">
+<img name="location" src="../../static/template_rest/html/images/location.jpg" alt="location" border="0" height="93" width="83"></a></td>
+<td colspan="2"> <a href="#" onmouseover="window.status='menu'; changeImages('menu', '../../static/template_rest/html/images/menu-over.jpg'); return true;" onmouseout="window.status=''; changeImages('menu', '../../static/template_rest/html/images/menu.jpg'); return true;">
+<img name="menu" src="../../static/template_rest/html/images/menu.jpg" alt="menu" border="0" height="93" width="73"></a></td>
+<td colspan="3"> <a href="#" onmouseover="window.status='contacts'; changeImages('contacts', '../../static/template_rest/html/images/contacts-over.jpg'); return true;" onmouseout="window.status=''; changeImages('contacts', '../../static/template_rest/html/images/contacts.jpg'); return true;">
+<img name="contacts" src="../../static/template_rest/html/images/contacts.jpg" alt="contacts" border="0" height="93" width="119"></a></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="93" width="1"></td>
+</tr>
+<tr>
+
+<td colspan="8" rowspan="2"><img src="../../static/template_rest/html/images/m2.jpg" alt="hellio" height="228" width="425"></td>
+<td colspan="9"> <img src="../../static/template_rest/html/images/m3.jpg" alt="" height="119" width="350"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="119" width="1"></td>
+</tr>
+<tr>
+<td colspan="7" class="text2" align="left" height="109" valign="top" width="319">
+Numero de pessoas : {{oi}}
+<p>Numero de pessoas na fila: 0</p>
+
+<p>O restaurante esta menos movimentado do que o usual!</p>
+
+
+
+<td colspan="2"> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="109" width="31"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="109" width="1"></td>
+</tr>
+<tr>
+<td colspan="3"> <img src="../../static/template_rest/html/images/nw1.jpg" alt="" height="49" width="249"></td>
+<td rowspan="8"> <img src="../../static/template_rest/html/images/sr1.jpg" alt="" height="265" width="35"></td>
+<td colspan="13" rowspan="2"> <img src="../../static/template_rest/html/images/sr2.jpg" alt="" height="62" width="491"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="49" width="1"></td>
+</tr>
+<tr>
+<td rowspan="7"> <img src="../../static/template_rest/html/images/nw2.jpg" alt="" height="216" width="61"></td>
+<td rowspan="3" style="line-height: 12px;" align="left" height="60" valign="top" width="144"><span class="text1">19.12 </span>
+	<br>
+Venha comemorar a apresentacao do TCC conosco!</td>
+<td rowspan="7" align="left" valign="top">
+<img src="../../static/template_rest/html/images/spacer.gif" alt="" height="216" width="44"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="13" width="1"></td>
+</tr>
+<tr>
+<td colspan="2" rowspan="4" align="left" valign="top"> <img src="../../static/template_rest/html/images/sr3.jpg" alt="" height="119" width="118"></td>
+<td colspan="4" align="left" valign="top">
+<img src="../../static/template_rest/html/images/spacer.gif" alt="" height="18" width="105"></td>
+<td rowspan="6" align="left" valign="top">
+<img src="../../static/template_rest/html/images/spacer.gif" alt="" height="203" width="29"></td>
+<td colspan="2" rowspan="4" align="left" valign="top"> <img src="../../static/template_rest/html/images/sr4.jpg" alt="" height="119" width="114"></td>
+<td colspan="3" align="left" valign="top">
+<img src="../../static/template_rest/html/images/spacer.gif" alt="" height="18" width="102"></td>
+<td rowspan="6"> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="203" width="23"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="18" width="1"></td>
+</tr>
+<tr>
+<td colspan="4" rowspan="3" style="line-height: 12px;" align="left" height="101" valign="top" width="105"><span class="text1"> </span>Receita do dia</td>
+<td colspan="3" rowspan="3" style="line-height: 12px;" align="left" height="101" valign="top" width="102"><span class="text1"></span>Promocao da semana! 
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="29" width="1"></td>
+</tr>
+<tr>
+<td style="line-height: 12px;" align="left" height="60" valign="top" width="144"><span class="text1">17.01</span> <br>
+Venha comer uma pizza deliciosa</td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="60" width="1"></td>
+</tr>
+<tr>
+<td rowspan="2" style="line-height: 12px;" align="left" height="61" valign="top" width="144"><span class="text1">20.01 </span><br>
+Festa de aniversario do dono</td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="12" width="1"></td>
+</tr>
+<tr>
+<td colspan="6" rowspan="2" class="text2" align="left" height="84" valign="top" width="223"><span class="text3">Voce ja comeu o nosso delicioso frango?<br>
+<a href="#" class="a">Veja a receita</a></td>
+<td colspan="5" rowspan="2" class="text2" align="left" height="84" valign="top" width="216"><span class="text3">Carne ao molho concasse</span> <br>
+Mas que delicia!<br>
+<a href="#" class="a">Ganhe o cupom!</a></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="49" width="1"></td>
+</tr>
+<tr>
+<td align="left" height="35" valign="top" width="144"><a href="#" class="b">mais eventos
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="35" width="1"></td>
+</tr>
+<tr>
+<td colspan="17" class="text4" align="center" bgcolor="#979076" height="47" valign="middle" width="775"> <a href="#">Home</a> | <a href="#">About Us</a> | <a href="#">Location</a>
+| <a href="#">Menu</a> | <a href="#">Partners</a>
+| <a href="#">News</a> | <a href="#">Contact
+Us</a></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="47" width="1"></td>
+</tr>
+<tr>
+<td colspan="17" class="text5" align="center" height="47" valign="middle" width="775">Copyright
+Your Company Name. Designed by TemplateYes - <a href="http://www.templateyes.com/html-templates.htm" class="a" target="_blank">Free Web Templates</a><br>
+Supported by <a href="http://www.hosting24.com/" target="_blank">Hosting24.com</a></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="47" width="1"></td>
+</tr>
+<tr>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="61"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="144"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="44"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="35"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="29"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="89"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="6"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="17"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="75"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="7"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="29"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="47"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="67"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="6"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="88"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="8"></td>
+<td> <img src="../../static/template_rest/html/images/spacer.gif" alt="" height="1" width="23"></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<!-- End ImageReady Slices -->
+</center>
+</body></html>

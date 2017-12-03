@@ -73,8 +73,8 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novo
 def Pessoa_Nova(cx, new_width, cy, cur, tempo_video):
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (cx, cx, cy, cy,))
     quadrante = cur.fetchall()
-    quadrante_id = quadrante[0][0]
-    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    Quadranteid = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     #xa = medida[1]
     #ya = medida[2]
@@ -107,8 +107,8 @@ def Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y):
 
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (cx, cx, cy, cy,))
     quadrante = cur.fetchall()
-    quadrante_id = quadrante[0][0]
-    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadrante_id=?""", (quadrante_id,))
+    Quadranteid = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     xa = medida[1]
     ya = medida[2]
@@ -138,6 +138,9 @@ def Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y):
                             id_pessoa = lista_pontos[0][4]
                             cur.execute("""SELECT * FROM 'Posicao' WHERE Pessoa_id = ?""", (id_pessoa,))
                             id_posicao = (cur.fetchall())[0][0]
+                i+3
+                j+3
+
 
     return (novo, id_pessoa, id_posicao)
 
@@ -286,8 +289,8 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
             for i in range (pp):
                 novo = True
                 new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-                #novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
-                novo, pessoax, posicaox = Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y)
+                novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+                #novo, pessoax, posicaox = Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y)
                 if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
                     #print ("sounovo")
                     #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)

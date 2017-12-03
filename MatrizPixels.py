@@ -59,14 +59,14 @@ def Salvar_MedidaFinal(cur):
     quadrantes_sem_medidas = []
     #para quadrantes que tem medidas
     for quadrante in lista_quadrantes:
-        quadrante_id = quadrante[0]
-        cur.execute("""SELECT * FROM 'MedidaParcial' WHERE Quadrante_id = ?""", (quadrante_id,))
+        Quadranteid = quadrante[0]
+        cur.execute("""SELECT * FROM 'MedidaParcial' WHERE Quadranteid = ?""", (Quadranteid,))
         lista_medidas = cur.fetchall()
         if (len(lista_medidas)==0):
-            quadrantes_sem_medidas.append(quadrante_id)
+            quadrantes_sem_medidas.append(Quadranteid)
         else:
             largura, altura = Media_Medidas(lista_medidas)
-            valores_input = (None, largura, altura, quadrante_id)
+            valores_input = (None, largura, altura, Quadranteid)
             cur.execute("""INSERT INTO MedidaFinal VALUES (?,?,?,?)""", valores_input)
     #para quadrantes que nao tem
     for quad in quadrantes_sem_medidas:
