@@ -290,6 +290,7 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
                 novo = True
                 new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
                 novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
+                it+=new_width
                 #novo, pessoax, posicaox = Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y)
                 if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
                     #print ("sounovo")
@@ -304,7 +305,7 @@ def Comparar_e_Salvar_Novos(contours1, img, areaTH, pid, num_frame, tempo_video,
                     #########   EXPLICACAO LOGICA   ###########
                     ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
                     img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
-                    it+=new_width
+                    
                     #pa = np.array ([[cx]])
                     #pb = np.array ([[cy]])
                     #nv_pt = np.dstack((pa,pb))
