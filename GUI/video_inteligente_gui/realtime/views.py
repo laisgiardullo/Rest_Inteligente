@@ -33,7 +33,31 @@ def index(request):
 	oi = a[ultimo-1].num_de_pessoas
 	return render_to_response('index.html', locals(), context_instance=RequestContext(request))
 
+def home_admin(request):
+	numero_pessoas = Numeropessoastotal.objects.all()
+	ultimo = len(numero_pessoas)
+	ultimo_numero = numero_pessoas[ultimo-1]
+	lista_datahora=[]
+	for obj in numero_pessoas:
+		datahora = Datahora.objects.filter(id = obj.datahora_id)
+		horario = str(datahora[0].hora)+":"+str(datahora[0].minutos)
+		lista_datahora.append(horario)
+	ultimo = len(numero_pessoas)
+	#oi = a[ultimo-1].num_de_pessoas
+	return render_to_response('Home_admin.html', locals(), context_instance=RequestContext(request))
 
+def historico_admin(request):
+	numero_pessoas = Numeropessoastotal.objects.all()
+	ultimo = len(numero_pessoas)
+	ultimo_numero = numero_pessoas[ultimo-1]
+	lista_datahora=[]
+	for obj in numero_pessoas:
+		datahora = Datahora.objects.filter(id = obj.datahora_id)
+		horario = str(datahora[0].dia)+"/"+str(datahora[0].mes)+","+ str(datahora[0].hora)+":"+str(datahora[0].minutos)
+		lista_datahora.append(horario)
+	ultimo = len(numero_pessoas)
+	#oi = a[ultimo-1].num_de_pessoas
+	return render_to_response('historico_admin.html', locals(), context_instance=RequestContext(request))
 
 # def visualizar_formulario(request):
 #     todos_formularios = Perguntas.objects.all()

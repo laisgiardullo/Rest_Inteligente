@@ -22,6 +22,8 @@ import settings
 urlpatterns = [
 
     url(r'^realtime/', 'realtime.views.index', name='perguntas'),
+    url(r'^home_admin/', 'realtime.views.home_admin', name='home_admin'),
+    url(r'^historico_admin/', 'realtime.views.historico_admin', name='historico_admin'),
     url(r'^admin/', admin.site.urls),
 
     url(r'^static/(?P<path>.*)$', 'django.views.static.serve',
