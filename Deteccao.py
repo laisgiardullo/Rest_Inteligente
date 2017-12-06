@@ -15,13 +15,13 @@ from Posicionamento import *
 
 
 def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novos_pts, con):
-    arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
-    texto3 = arquivo3.readlines()
-    arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
+    #arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'r')
+    #texto3 = arquivo3.readlines()
+    #arquivo3 = open('resultados/res_testes_excel_pontual.txt', 'w')
 
-    arquivo4 = open('resultados/res_numpy.txt', 'r')
-    texto4 = arquivo4.readlines()
-    arquivo4 = open('resultados/res_numpy.txt', 'w')
+    #arquivo4 = open('resultados/res_numpy.txt', 'r')
+    #texto4 = arquivo4.readlines()
+    #arquivo4 = open('resultados/res_numpy.txt', 'w')
 
     #inicializacao de variaveis
     kernelOp = np.ones((3,3),np.uint8)
@@ -60,10 +60,10 @@ def Countours_Area_Pontual(img, fgbg, persons, pid, num_frame, tempo_video, novo
     #texto4.append(str(contours1))
     #print (contours1)
 
-    arquivo3.writelines(texto3)
-    arquivo3.close()
-    arquivo4.writelines(texto4)
-    arquivo4.close()
+    #arquivo3.writelines(texto3)
+    #arquivo3.close()
+    #arquivo4.writelines(texto4)
+    #arquivo4.close()
 
 
 
@@ -157,7 +157,7 @@ def Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur):
                 y_salvar = y+j
                 cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-1<? AND X+1>? AND Y-1<? AND Y+1>?""", (x_salvar,x_salvar,y_salvar,y_salvar))
                 lista_pontos = cur.fetchall()
-            if (len(lista_pontos)==0 or novo==False):
+            if (len(lista_pontos)==0):
                 if (no_contorno>=0):
                     x_salvar = new_x+i
                     y_salvar = y+j
@@ -165,11 +165,12 @@ def Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur):
                         lista_objetos.append([None, 1, x_salvar,y_salvar, pid])
                     if (no_contorno>0):
                         lista_objetos.append([None, 0, x_salvar,y_salvar, pid])
-                    j+=3
-                    i+=3
+                    j+=2
+                    i+=2
             else:
-                novo = False
-                id_pessoa = lista_pontos[0][4]
+                if(novo ==True):
+                    novo = False
+                    id_pessoa = lista_pontos[0][4]
     if (novo == False):
         for obj in lista_objetos:
             obj[4] = id_pessoa
@@ -231,6 +232,7 @@ def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video
                 novo, pessoax = Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur)
                 #novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
                 #if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
+                it+=new_width
                 if (novo): 
                     #print ("sounovo")
                     #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
@@ -244,7 +246,7 @@ def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video
                     #########   EXPLICACAO LOGICA   ###########
                     ##agora, vamos fazer um teste: desenhar retangulo em cada objeto
                     img = cv2.rectangle(img,(new_x,y),(new_x+new_width,y+h),(0,255,0),2)
-                    it+=new_width
+                    
                     #pa = np.array ([[cx]])
                     #pb = np.array ([[cy]])
                     #nv_pt = np.dstack((pa,pb))

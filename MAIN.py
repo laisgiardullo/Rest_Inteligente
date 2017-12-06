@@ -47,14 +47,30 @@ cur = con.cursor()
 
 
 frame_estabilizado = input("Digite o frame inicial para contagem")
-areaTH = input("Area Minima Pessoa")
-tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
+limpar_tabela = input("Digite 1 para deletar todos registros existentes ou 0 para manter")
+
+if(limpar_tabela==1):
+    cur.execute("""DELETE FROM DataHora""")
+    cur.execute("""DELETE FROM Quadrantes""")
+    cur.execute("""DELETE FROM Pessoa""")
+    cur.execute("""DELETE FROM Posicao""")
+    cur.execute("""DELETE FROM PontoAtualInterno""")
+    cur.execute("""DELETE FROM MedidaParcial""")
+    cur.execute("""DELETE FROM MedidaFinal""")
+    cur.execute("""DELETE FROM NumeroPessoasQuadrante""")
+    cur.execute("""DELETE FROM Local""")
+    cur.execute("""DELETE FROM NumeroPessoasLocal""")
+    cur.execute("""DELETE FROM NumeroPessoasTotal""")
+
+#areaTH = input("Area Minima Pessoa")
+#tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
+tipo = 5
 salto_Opt_Flow = input("Digite de quantos em quantos quadros voce deseja fazer o optical flow")
 
 Inicializar_Quadrantes(cur)
 
 ret, frame = cap.read()
-ret, frame = cap.read()
+Sret, frame = cap.read()
 ret, frame = cap.read()
 ret, frame = cap.read()
 ret, frame = cap.read()
@@ -67,14 +83,14 @@ ret, frame = cap.read()
 ret, frame = cap.read()
 
 frame = cv2.resize(frame, (w_frame, h_frame))
+calibracao = input("digite 1 para calibracao ou 0 para continuar")
 
-DesenharPessoas(frame, cur)
+if(calibracao==1):
+    DesenharPessoas(frame, cur)
+    DesenharAreasDeteccao(frame, cur)
+    DesenharAreasDescarte(frame, cur)
+    Salvar_MedidaFinal(cur)
 
-DesenharAreasDeteccao(frame, cur)
-
-DesenharAreasDescarte(frame, cur)
-
-Salvar_MedidaFinal(cur)
 largurafinal_geral,alturafinal_geral  = TotalMedidaFinal(cur)
 
 areaTH = (largurafinal_geral*alturafinal_geral)/2
@@ -183,12 +199,12 @@ elif (tipo ==5):
         tempo_video = cap.get(0)
         contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, nframe, tempo_video, novos_pts, con)
         if(nframe>frame_estabilizado):
-            frame2 , pid = Comparar_e_Salvar_Novos(contours1, frame, areaTH, pid, nframe, tempo_video, con)
+            frame2 , pid = Comparar_e_Salvar_Novos2(contours1, frame, areaTH, pid, nframe, tempo_video, con)
             if (nframe%salto_Opt_Flow==0):
                 matriz_flow = OptFlowDense(old_frame, frame, matriz_flow)
                 old_frame = frame
                 Atualizar_PontosAtuaisInternos(matriz_flow, cur, frame, tempo_video)
-                Limpar_PontosPerdidos(cur)
+                Limpar_PontosPerdidos2(cur, matriz_flow)
                 #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
                 Atualizar_PosicoesFlow(cur, tempo_video, frame)
 

@@ -206,7 +206,7 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 	cv2.imshow('posicoes',frame2)
 	return
 
-def Limpar_PontosPerdidos(cur):
+def Limpar_PontosPerdidos(cur, matriz_flow):
 	cur.execute("""SELECT * FROM 'Posicao' WHERE Atual =1""")
 	lista_pos = cur.fetchall()
 	for pos in lista_pos:
@@ -226,6 +226,35 @@ def Limpar_PontosPerdidos(cur):
 			dist_quad_y = (y_pos-y_ponto)*(y_pos-y_ponto)
 			if((dist_quad_y+dist_quad_x)>=dist_quad_max):
 				cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id=?""",(id_ponto,))
+	return
+
+
+def Limpar_PontosPerdidos2(cur, matriz_flow):
+	cur.execute("""SELECT * FROM 'Posicao' WHERE Atual =1""")
+	lista_pos = cur.fetchall()
+	for pos in lista_pos:
+		pessoa_id = pos[6]
+		x_pos = pos[1]
+		y_pos = pos[2]
+		largura_media = Largura_Media(x_pos, y_pos, cur)
+		altura_media = Altura_Media(x_pos, y_pos, cur)
+		cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE Pessoa_id=?""", (pessoa_id,))
+		lista_pontos = cur.fetchall()
+		for ponto in lista_pontos:
+			x_ponto=ponto[2]
+			y_ponto=ponto[3]
+			id_ponto = ponto[0]
+			dist_quad_max = largura_media*largura_media + altura_media*altura_media
+			dist_quad_x = (x_pos-x_ponto)*(x_pos-x_ponto)
+			dist_quad_y = (y_pos-y_ponto)*(y_pos-y_ponto)
+			if((dist_quad_y+dist_quad_x)>=dist_quad_max):
+				for ponto_final in lista_pontos:
+					ponto_final_x = ponto_final[2]
+					ponto_final_y = ponto_final[3]
+					deslocamento_x = int(matriz_flow[int(ponto_final_y)][int(ponto_final_x)][0])
+					deslocamento_y = int(matriz_flow[int(ponto_final_y)][int(ponto_final_x)][1])
+					if (deslocamento_x==0 and deslocamento_y==0):
+						cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id=?""",(ponto_final[0],))
 	return
 
 

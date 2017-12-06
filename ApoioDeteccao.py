@@ -70,8 +70,8 @@ def Salvar_PontoAtualInterno(new_width, h, cnt, pid, new_x, y, cur):
                     lista_objetos.append((None, 1, x_salvar,y_salvar, pid))
                 if (no_contorno>0):
                     lista_objetos.append((None, 0, x_salvar,y_salvar, pid))
-                j+=3
-                i+=3
+                j+=1
+                i+=1
     cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
     return
 
