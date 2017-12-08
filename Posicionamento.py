@@ -35,9 +35,10 @@ def Altura_Media(x, y, cur):
     return (altura_media)
 
 
-
-
-
+def Todas_Pessoas_Sairem(cur, tempo_video):
+	cur.execute("""UPDATE Pessoa SET Instante_Saida = ?, Status = "out" """, (tempo_video,))
+	cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Atual=1""", (tempo_video,))	
+	cur.execute("""DELETE FROM 'PontoAtualInterno'""")
 
 def PessoaSair(cur, id_pessoa, tempo_video):
     cur.execute("""UPDATE Pessoa SET Instante_Saida = ?, Status = "out" WHERE Id=?""", (tempo_video, id_pessoa,))
@@ -60,17 +61,6 @@ def OptFlow(old_frame, frame, p0, mask):
 	p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
 	print("p1: "+str(p1))
 
-	 # Select good points
-	#good_new = p1[st==1] #status==1: flow foi encontrado
-	#good_old = p0[st==1]
-	#print("good_new:"+str(good_new))
-	#print("good_old:"+str(good_new))
-	# # draw the tracks
-
-	# #ZIP x = [1, 2, 3], y = [4, 5, 6], zip(x, y) =[(1, 4), (2, 5), (3, 6)]
-	# #ENUMERATE seasons = ['Spring', 'Summer', 'Fall', 'Winter'], list(enumerate(seasons)) = [(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
-	# # i = numero do enumerate, new = elemento do good_new, old = elemento do good_old
-	# for i,(new,old) in enumerate(zip(good_new,good_old)):
 	for i,(new,old) in enumerate(zip(p1,p0)):
 		a,b = new.ravel() #ravel: A 1-D array, containing the elements of the input, is returned
 		c,d = old.ravel()
@@ -119,7 +109,8 @@ def Atualizar_PontosAtuaisInternos(matriz_flow, cur, img, tempo_video):
 				PessoaSair(cur, pessoa_id, tempo_video)
 				#cur.execute("""DELETE * FROM 'PontoAtualInterno' WHERE Id = ?""", (ponto[0],))
 
-		cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ? WHERE Id = ?""", (x_prox, y_prox, ponto[0]))
+		else:
+			cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ? WHERE Id = ?""", (x_prox, y_prox, ponto[0]))
 	
 		mask = cv2.line(mask, (int(x_ant),int(y_ant)),(int(x_prox),int(y_prox)), (0,255,0), 2)
 		#mask = cv2.putText(mask, "AQUI", (int(x_prox),int(y_prox)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
@@ -256,5 +247,22 @@ def Limpar_PontosPerdidos2(cur, matriz_flow):
 					if (deslocamento_x==0 and deslocamento_y==0):
 						cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id=?""",(ponto_final[0],))
 	return
+
+def Limpar_PtosAreasDescarte(cur, tempo_video):
+	cur.execute("""SELECT * FROM 'Local' WHERE Tipo ='ignorar'""")
+	locais_ign = cur.fetchall()
+	for local in locais_ign:
+		local_x = local[3]
+		local_y = local[4]
+		local_x_max = local_x + local[5]
+		local_y_max = local_y + local[6]
+		cur.execute("""SELECT * FROM 'Posicao' WHERE Atual = 1 AND X>=? AND X<=? AND Y>=? AND Y<=?""", (local_x, local_x_max, local_y, local_y_max,))
+		lista_pontos_excluir = cur.fetchall()
+		for ponto in lista_pontos_excluir:
+			id_pessoa = ponto[6]
+			PessoaSair(cur, id_pessoa, tempo_video)
+	return
+		#cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome INT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)") #tipo = tracking, fila ou ignorar
+
 
 

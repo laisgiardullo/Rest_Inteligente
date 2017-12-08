@@ -90,7 +90,7 @@ def Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, c
         
         antigo_x = int(novos_pts[ponto][0][0])
         novo_x = int(novos_pts_prox[ponto][0][0])
-        print("novo_x="+str(novo_x))
+        #print("novo_x="+str(novo_x))
         antigo_y = int(novos_pts[ponto][0][1])
         novo_y = int(novos_pts_prox[ponto][0][1])
 

@@ -63,3 +63,16 @@ class Numeropessoastotal(models.Model):
         managed = False
         db_table = 'NumeroPessoasTotal'
 
+class Posicao(models.Model):
+    id = models.IntegerField(db_column='Id', primary_key=True, blank=True, null=False)  # Field name made lowercase.
+    x = models.IntegerField(db_column='X', blank=True, null=True)  # Field name made lowercase.
+    y = models.IntegerField(db_column='Y', blank=True, null=True)  # Field name made lowercase.
+    instante_inicial = models.IntegerField(db_column='Instante_Inicial', blank=True, null=True)
+    instante_final = models.IntegerField(db_column='Instante_Final', blank=True, null=True)
+    atual = models.IntegerField(db_column='Atual', blank=True, null=True)
+    pessoa_id = models.IntegerField(db_column='Pessoa_id', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Posicao'
+

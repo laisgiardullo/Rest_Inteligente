@@ -19,14 +19,14 @@ from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture(r'videos\armarios_biblio.mov') #Open video file
-#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
 #cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Chinese_Rest.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\IMG_2409.mov')
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
-cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
 #cap.set(4,90) #set height (4) para 90
@@ -198,37 +198,26 @@ elif (tipo ==5):
         frame = cv2.resize(frame, (w_frame, h_frame))
         tempo_video = cap.get(0)
         contours1 = Countours_Area_Pontual(frame, fgbg, persons, pid, nframe, tempo_video, novos_pts, con)
+        print("countours")
         if(nframe>frame_estabilizado):
             frame2 , pid = Comparar_e_Salvar_Novos2(contours1, frame, areaTH, pid, nframe, tempo_video, con)
+            print("comparar e salvar")
             if (nframe%salto_Opt_Flow==0):
                 matriz_flow = OptFlowDense(old_frame, frame, matriz_flow)
+                print("matriz flow")
                 old_frame = frame
                 Atualizar_PontosAtuaisInternos(matriz_flow, cur, frame, tempo_video)
+                print("ptos internos")
+                Limpar_PtosAreasDescarte(cur, tempo_video)
+                print ("descarte")
                 Limpar_PontosPerdidos2(cur, matriz_flow)
+                print("ptos perdidos")
                 #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
                 Atualizar_PosicoesFlow(cur, tempo_video, frame)
+                print("pos flow")
 
                 SalvarNumPessoasTotal(now_id, cur)
-
-
-
-        #frame2, persons, pid = Countours_Area(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
-        #frame2, persons, pid = Countours_Area_Door(frame, fgbg, persons, pid, max_p_age, nframe, tempo_video)
-        #frame2, persons, pid, old_frame,p0 = Countours_Area_Seguir(frame, fgbg, persons, pid, max_p_age,nframe, tempo_video, old_frame,p0, p1)
-        #if(novos_pts!=[]):
-        #    novos_pts = novos_pts.reshape(-1,1,2)
-        #p0 = np.dstack((lista_cx,lista_cy))
-        #p0 = p0.astype(np.float32)
-        #cur.execute("""SELECT * FROM 'Posicao' WHERE Atual=1""")
-        #objetos_ativos = cur.fetchall() #resultado inteiro da ultima selecao
-        #novos_pts = Tranformar_em_Numpy(objetos_ativos)
-        #print("novos_pts="+str(novos_pts))
-        #if (novos_pts!=[] and nframe>frame_estabilizado and nframe%15==0):
-        #    novos_pts_prox, mask = OptFlow(old_frame, frame, novos_pts, mask) #tem que transformar esses novos pts em p0...
-        #    Atualizar_Posicoes(objetos_ativos, novos_pts, novos_pts_prox, tempo_video, cur, frame2, mask, contours1)
-        #    old_frame = frame
-        #Atualizar_Status(tempo_video, cur)
-            #novos_pts = novos_pts_prox
+                #SalvarNumPessoasLocal(now_id, cur)
             cv2.imshow('Frame',frame2)
         nframe +=1
         
@@ -236,6 +225,7 @@ elif (tipo ==5):
         #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:
+            Todas_Pessoas_Sairem(cur, tempo_video)
             con.commit()
             con.close()
             break

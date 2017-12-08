@@ -30,11 +30,11 @@ def draw_lines(event,x,y,flags,param):
 
 
     if event == cv2.EVENT_LBUTTONDOWN:
-        print("entrei clique")
+        #print("entrei clique")
         drawing = True
         ix,iy = x,y
         param[0].append((x,y))
-        print(param[0])
+        #print(param[0])
     #enquanto mouse se move
     elif event == cv2.EVENT_MOUSEMOVE:
         if drawing == True:
@@ -126,9 +126,9 @@ def SalvarMedidaParcial(ix, iy, x, y, cur):
     Height_p = abs(y-iy)
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x_meio, x_meio, y_meio, y_meio,))
     quadrante = cur.fetchall()
-    print(quadrante)
+    #print(quadrante)
     quadrante_id = quadrante[0][0]
-    print("qua"+str(quadrante_id))
+    #print("qua"+str(quadrante_id))
     valores_input = (None, x_meio, y_meio, Width_p, Height_p, quadrante_id)
     cur.execute("""INSERT INTO MedidaParcial VALUES (?,?,?,?,?,?)""", valores_input)
     return

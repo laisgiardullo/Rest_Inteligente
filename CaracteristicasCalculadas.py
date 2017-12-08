@@ -54,3 +54,23 @@ def SalvarNumPessoasTotal(now_id, cur):
     objeto = (None, num_pessoas, now_id)
     cur.execute("INSERT INTO NumeroPessoasTotal VALUES(?,?,?)", objeto)
     return
+
+def SalvarNumPessoasLocal(now_id, cur):
+    #cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome INT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)") #tipo = tracking, fila ou ignorar
+    objetos_num_locais = []
+    cur.execute("""SELECT * FROM 'Local' Where Tipo!='ignorar'""")
+    lista_locais = cur.fetchall()
+    for local in lista_locais:
+        local_id = local[0]
+        local_x = local[3]
+        local_x_max = local[3] + local[5]
+        local_y = local[4]
+        local_y_max = local[4] + local[6]
+        cur.execute("""SELECT * FROM 'Posicao' Where Atual = 1 AND X>=? AND X<=? AND Y>=? AND Y<= ?""", (local_x, local_x_max, local_y, local_y_max,))
+        pessoas = cur.fetchall()
+        num_pessoas = len(pessoas)
+        objetos_num_locais.append((None, num_pessoas, now_id, local_id))
+    cur.executemany("INSERT INTO NumeroPessoasLocal VALUES(?,?,?,?)", objetos_num_locais)
+
+    
+

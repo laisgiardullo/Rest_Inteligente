@@ -144,39 +144,60 @@ def Pessoa_Nova3(cx, new_width, cy, cur, tempo_video, cnt, h, new_x, y):
 
     return (novo, id_pessoa, id_posicao)
 
-def Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur):
+def Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur, lista_pontosinternos):
+    print("pessoa nova2")
     lista_objetos = []
     novo = True
     lista_pontos = []
     id_pessoa = None
-    for i in range (new_width):
-        for j in range (h):
+    xa = largura_padrao/2
+    ya = altura_padrao/2
+    achou_proximo = False
+
+    limite = xa*xa+ya*ya
+    i=0
+    j=0
+    while (i < new_width):
+        while (j< h):
+    #for i in range (new_width):
+    #    for j in range (h):
             no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
-            if (novo and no_contorno>=0):
+            achou_existente = False
+            if (no_contorno>=0): #se estiver dentro ou no contorno
                 x_salvar = new_x+i
                 y_salvar = y+j
-                cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-1<? AND X+1>? AND Y-1<? AND Y+1>?""", (x_salvar,x_salvar,y_salvar,y_salvar))
+                cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-5<? AND X+5>? AND Y-5<? AND Y+5>?""", (x_salvar,x_salvar,y_salvar,y_salvar))
                 lista_pontos = cur.fetchall()
-            if (len(lista_pontos)==0):
-                if (no_contorno>=0):
-                    x_salvar = new_x+i
-                    y_salvar = y+j
+                if (len(lista_pontos)>0):
+                    achou_existente = True
+                if (achou_existente and novo):
+                    novo = False
+                    id_pessoa = lista_pontos[0][4]
+                if (not achou_existente):
+                    cur.execute("""SELECT * FROM 'Posicao' WHERE ((?-X)*(?-X)+(?-Y)*(?-Y))<=? AND Atual=1 ORDER BY ((?-X)*(?-X)+(?-Y)*(?-Y))""", (x_salvar, x_salvar, y_salvar, y_salvar, limite, x_salvar, x_salvar, y_salvar, y_salvar, ))
+                    lista_posprox = cur.fetchall()
+                    if (len(lista_posprox)!=0):
+                        achou_proximo = True
+                        novo = False
+                        id_pessoa = lista_posprox[0][6]
+                    #cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X-5<? AND X+5>? AND Y-5<? AND Y+5>?""", (x_salvar,x_salvar,y_salvar,y_salvar))
+                #elif (not achou_existente):
+                    #x_salvar = new_x+i
+                    #y_salvar = y+j
                     if (no_contorno==0):
                         lista_objetos.append([None, 1, x_salvar,y_salvar, pid])
                     if (no_contorno>0):
                         lista_objetos.append([None, 0, x_salvar,y_salvar, pid])
-                    j+=2
-                    i+=2
-            else:
-                if(novo ==True):
-                    novo = False
-                    id_pessoa = lista_pontos[0][4]
+            j+=1
+        i+=1
     if (novo == False):
         for obj in lista_objetos:
             obj[4] = id_pessoa
+    for objeto in lista_objetos:
+        lista_pontosinternos.append(objeto)
 
-    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
-    return (novo, id_pessoa)
+    #cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
+    return (novo, id_pessoa, lista_pontosinternos)
 
 def Determinar_Pessoa(contours1, img, areaTH, pid, num_frame, tempo_video, novos_pts, con, tipo_seguir):
      ### XX OUTROS TESTES XX ###
@@ -225,15 +246,17 @@ def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video
             it = 0 #it = iteracao
             lista_obj = []
             lista_obj_pos = []
+            lista_pontosinternos = []
             cur = con.cursor()
             for i in range (pp):
                 novo = True
                 new_x, cx, cy = Atualizar_Retangulo(x, y, h, new_width, it)
-                novo, pessoax = Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur)
+                novo, pessoax, lista_pontosinternos = Pessoa_Nova2(new_width, h, cnt, pid, new_x, y, cur, lista_pontosinternos)
                 #novo, pessoax, posicaox = Pessoa_Nova(cx, new_width, cy, cur, tempo_video)
-                #if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
                 it+=new_width
-                if (novo): 
+                if (novo and cx>largura_padrao and cx<(w_frame-largura_padrao) and cy>altura_padrao and cy<(h_frame-altura_padrao)):
+                
+                #if (novo): 
                     #print ("sounovo")
                     #p = Person.Pessoa_Pontual(pid,cx,cy, new_width, num_frame,tempo_video)
                     #(Id INT, X INT, Y INT, Status TEXT, Width INT, Num_Frame INT, Instante INT)")
@@ -255,17 +278,21 @@ def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video
                     #    if (novos_pts !=[]):
                     #        novos_pts = np.append(novos_pts,nv_pt, axis = 0)
                     #    else: novos_pts = nv_pt
-                    if (lista_obj!=[]):
-                        with con:
-                            cur = con.cursor()
-                            cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
-                            cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
-                            lista_obj=[]
-                            lista_obj_pos=[]
-                    else:
+            if (lista_obj!=[]):
+                with con:
+                    cur = con.cursor()
+                    cur.executemany("INSERT INTO Pessoa VALUES(?,?,?,?,?)", lista_obj)
+                    cur.executemany("INSERT INTO Posicao VALUES(?,?,?,?,?,?,?)", lista_obj_pos)
+                    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_pontosinternos)
+                    lista_obj=[]
+                    lista_obj_pos=[]
+                    lista_pontosinternos = []
+                    #else:
                         #Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur)
-                        pass
 
+            elif (lista_pontosinternos!=[]):
+                cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_pontosinternos)
+                lista_pontosinternos = []
 
     return img , pid
 
