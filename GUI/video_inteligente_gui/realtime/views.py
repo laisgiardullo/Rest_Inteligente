@@ -30,8 +30,11 @@ import math
 def index(request):
 	a = Numeropessoastotal.objects.all()
 	ultimo = len(a)
-	oi = a[ultimo-1].num_de_pessoas
-	lotacao = oi/0.8
+	if (ultimo>0):
+		oi = a[ultimo-1].num_de_pessoas
+		lotacao = oi/0.8
+	else: lotacao =0
+	
 	datahora = Datahora.objects.all()
 	ult = len(datahora)-1
 	horario = str(datahora[ult].dia)+"/"+str(datahora[ult].mes)+","+ str(datahora[ult].hora)+":"+str(datahora[ult].minutos)
@@ -54,16 +57,23 @@ def index(request):
 		for posicao_total in posicoes_no_local_total:
 			tempo += (posicao_total.instante_final - posicao_total.instante_inicial)
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
-	total_pessoas_fila = len(set(lista_pessoas_ids))
-	tempo_medio = int((tempo/total_pessoas_fila)/100)
+	try:
+		total_pessoas_fila = len(set(lista_pessoas_ids))
+		tempo_medio = int((tempo/total_pessoas_fila)/100)
+	except:
+		total_pessoas_fila = 0
+		tempo_medio = 0
 	return render_to_response('index.html', locals(), context_instance=RequestContext(request))
 
 def home_admin(request):
 	numero_pessoas = Numeropessoastotal.objects.all()
 	ultimo = len(numero_pessoas)
-	ultimo_numero = numero_pessoas[ultimo-1]
+	if (ultimo>0):
+		ultimo_numero = numero_pessoas[ultimo-1]
+		lotacao = ((ultimo_numero.num_de_pessoas)/0.8)
+	else: lotacao = 0
 	lista_datahora=[]
-	lotacao = ((ultimo_numero.num_de_pessoas)/0.8)
+	
 	for obj in numero_pessoas:
 		datahora = Datahora.objects.filter(id = obj.datahora_id)
 		horario = float(str(datahora[0].hora)+"."+str((datahora[0].minutos)).zfill(2)+str(datahora[0].segundos).zfill(2)+str(datahora[0].milissegundos).zfill(2))
@@ -88,14 +98,21 @@ def home_admin(request):
 			tempo += (posicao_total.instante_final - posicao_total.instante_inicial)
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
 	total_pessoas_fila = len(set(lista_pessoas_ids))
-	tempo_medio = int((tempo/total_pessoas_fila)/100)
+	try:
+		tempo_medio = int((tempo/total_pessoas_fila)/100)
+	except:
+		tempo_medio = 0
 	tempo_rest = 0
 	posicoes_rest = Posicao.objects.filter(atual = 0)
 	for posicao_total_rest in posicoes_rest:
 			tempo_rest += (posicao_total_rest.instante_final - posicao_total_rest.instante_inicial)
 			lista_pessoas_ids_rest.append(posicao_total_rest.pessoa_id)
-	total_pessoas_rest = len(set(lista_pessoas_ids_rest))
-	tempo_medio_rest = int((tempo_rest/total_pessoas_rest)/100)
+	try: 
+		total_pessoas_rest = len(set(lista_pessoas_ids_rest))
+		tempo_medio_rest = int((tempo_rest/total_pessoas_rest)/100)
+	except:
+		total_pessoas_rest = 0
+		tempo_medio_rest = 0
 
 
 
@@ -110,7 +127,10 @@ def home_admin(request):
 def historico_admin(request):
 	numero_pessoas = Numeropessoastotal.objects.all()
 	ultimo = len(numero_pessoas)
-	ultimo_numero = numero_pessoas[ultimo-1]
+	if (ultimo>0):
+		ultimo_numero = numero_pessoas[ultimo-1]
+	else:
+		ultimo_numero = 0
 	#ultimo_numero.num_de_pessoas
 	lotacao = ((ultimo_numero.num_de_pessoas)/0.8)
 	lista_datahora=[]
@@ -139,9 +159,13 @@ def historico_admin(request):
 		for posicao_total in posicoes_no_local_total:
 			tempo += (posicao_total.instante_final - posicao_total.instante_inicial)
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
-	total_pessoas_fila = len(set(lista_pessoas_ids))
-	tempo_medio = int((tempo/total_pessoas_fila)/100)
-	#ultimo = len(numero_pessoas)
+	try:
+		total_pessoas_fila = len(set(lista_pessoas_ids))
+		tempo_medio = int((tempo/total_pessoas_fila)/100)
+	except:
+		total_pessoas_fila = 0
+		tempo_medio = 0
+		#ultimo = len(numero_pessoas)
 	#oi = a[ultimo-1].num_de_pessoas
 	return render_to_response('historico_admin.html', locals(), context_instance=RequestContext(request))
 

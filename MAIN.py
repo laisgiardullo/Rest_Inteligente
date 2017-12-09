@@ -19,14 +19,14 @@ from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture(r'videos\armarios_biblio.mov') #Open video file
-cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
 #cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Chinese_Rest.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\IMG_2409.mov')
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
-#cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
 #cap.set(4,90) #set height (4) para 90
