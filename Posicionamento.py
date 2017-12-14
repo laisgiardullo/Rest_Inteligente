@@ -16,23 +16,15 @@ from CaracteristicasCalculadas import *
 from desenhar import *
 
 
-def Largura_Media(x, y, cur):
+def Medidas_Media(x, y, cur):
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
     quadrante = cur.fetchall()
     Quadranteid = quadrante[0][0]
     cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     largura_media = medida[1]
-    return (largura_media)
-
-def Altura_Media(x, y, cur):
-    cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
-    quadrante = cur.fetchall()
-    Quadranteid = quadrante[0][0]
-    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
-    medida = (cur.fetchall())[0]
     altura_media = medida[2]
-    return (altura_media)
+    return (largura_media, altura_media)
 
 
 def Todas_Pessoas_Sairem(cur, tempo_video):
@@ -45,45 +37,7 @@ def PessoaSair(cur, id_pessoa, tempo_video):
     cur.execute("""UPDATE Posicao SET Instante_Final = ?, Atual = 0 WHERE Pessoa_id=? AND Atual=1""", (tempo_video, id_pessoa,))
     cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Pessoa_id=?""",(id_pessoa,))
 
-def OptFlow(old_frame, frame, p0, mask):
-			#fonte: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_video/py_lucas_kanade/py_lucas_kanade.html
 
-	# Parameters for lucas kanade optical flow
-	lk_params = dict( winSize  = (15,15),
-					  maxLevel = 2,
-					  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-	 
-	# Create some random colors
-	#color = np.random.randint(0,255,(100,3))
-	old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-	frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	# calculate optical flow
-	p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-	print("p1: "+str(p1))
-
-	for i,(new,old) in enumerate(zip(p1,p0)):
-		a,b = new.ravel() #ravel: A 1-D array, containing the elements of the input, is returned
-		c,d = old.ravel()
-		#if((a,b)!=(c,d)):
-		mask = cv2.line(mask, (a,b),(c,d), (0,255,0), 2)
-		frame = cv2.circle(frame,(a,b),5,(0,255,0),-1)
-
-	img = cv2.add(frame,mask)
-
-	cv2.imshow('frame_22',img)
-
-	# # Now update the previous frame and previous points
-	old_gray = frame_gray.copy()
-	# #p0 = good_new.reshape(-1,1,2)
-	#if(len(good_new)==len(p1)):
-	#    try:
-	#        print("gnr:"+str(good_new.reshape(-1,1,2)))
-	#        good_new = good_new.reshape(-1,1,2) #voltar ao formato original de p0
-	#        novos_pts = good_new
-	#    except:
-	#        pass
-	novos_pts = p1
-	return (novos_pts, mask)
 def OptFlowDense(old_frame, frame, flow):
 	mask = np.zeros_like(frame)
 	next = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
@@ -102,15 +56,16 @@ def Atualizar_PontosAtuaisInternos(matriz_flow, cur, img, tempo_video):
 
 		deslocamento_x = matriz_flow[int(y_ant)][int(x_ant)][0]
 		deslocamento_y = matriz_flow[int(y_ant)][int(x_ant)][1]
+		deslocamento_total = int(deslocamento_x) + int (deslocamento_y)
 
 		x_prox = x_ant + deslocamento_x
 		y_prox = y_ant + deslocamento_y
 		if (x_prox<=1 or x_prox>=w_frame-1 or y_prox <=1 or y_prox >(h_frame-1)):
-				PessoaSair(cur, pessoa_id, tempo_video)
-				#cur.execute("""DELETE * FROM 'PontoAtualInterno' WHERE Id = ?""", (ponto[0],))
+			#PessoaSair(cur, pessoa_id, tempo_video)
+			cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id = ?""", (ponto[0],))
 
 		else:
-			cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ? WHERE Id = ?""", (x_prox, y_prox, ponto[0]))
+			cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ?, Ultima_mov = ? WHERE Id = ?""", (x_prox, y_prox, deslocamento_total, ponto[0]))
 	
 		mask = cv2.line(mask, (int(x_ant),int(y_ant)),(int(x_prox),int(y_prox)), (0,255,0), 2)
 		#mask = cv2.putText(mask, "AQUI", (int(x_prox),int(y_prox)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
@@ -118,47 +73,6 @@ def Atualizar_PontosAtuaisInternos(matriz_flow, cur, img, tempo_video):
 	frame2 = cv2.add(img,mask)
 	cv2.imshow('flow',frame2)
 	return
-
-def Atualizar_PontosAtuaisInternos2(matriz_flow, cur, img, tempo_video):
-	cur.execute("""SELECT * FROM 'Pessoa' WHERE Status='in'""")
-	lista_pessoa = cur.fetchall()
-	for pessoa in lista_pessoa:
-		pessoa_id = int(pessoa[0])
-		cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE Pessoa_id=?""", (pessoa_id,))
-		lista_pontos = cur.fetchall()
-		mask = np.zeros_like(img)
-		deslocamento_x_med = 0
-		deslocamento_y_med = 0
-		num_desl = len(lista_pontos)
-		for ponto in lista_pontos:
-			x_ant = ponto[2] #x fica na posicao 2 do objeto
-			y_ant = ponto[3]
-
-			deslocamento_x = matriz_flow[int(y_ant)][int(x_ant)][0]
-			deslocamento_y = matriz_flow[int(y_ant)][int(x_ant)][1]
-
-			deslocamento_x_med +=deslocamento_x
-			deslocamento_y_med +=deslocamento_y
-
-		deslocamento_x_med = deslocamento_x_med/num_desl
-		deslocamento_y_med = deslocamento_y_med/num_desl
-		for ponto in lista_pontos:
-			x_ant = ponto[2] #x fica na posicao 2 do objeto
-			y_ant = ponto[3]
-
-			x_prox = x_ant + deslocamento_x_med
-			y_prox = y_ant + deslocamento_y_med
-
-
-			cur.execute("""UPDATE PontoAtualInterno SET X = ?, Y = ? WHERE Id = ?""", (x_prox, y_prox, ponto[0]))
-		
-			mask = cv2.line(mask, (int(x_ant),int(y_ant)),(int(x_prox),int(y_prox)), (0,255,0), 2)
-			#mask = cv2.putText(mask, "AQUI", (int(x_prox),int(y_prox)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
-			mask = cv2.circle(mask,(int(x_prox),int(y_prox)),5,(0,255,0),-1)
-	frame2 = cv2.add(img,mask)
-	cv2.imshow('flow',frame2)
-	return
-
 
 
 def Atualizar_PosicoesFlow(cur, tempo_video, img):
@@ -169,9 +83,11 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 		pessoa_id = int(pessoa[0])
 		cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE Pessoa_id=?""", (pessoa_id,))
 		lista_pontos = cur.fetchall()
+		#print("listapts"+str(lista_pontos))
 		numero_pts = len(lista_pontos)
 		if (len(lista_pontos)==0):
-			PessoaSair(cur, pessoa_id, tempo_video)
+			#PessoaSair(cur, pessoa_id, tempo_video)
+			pass
 		else:
 			x_massa = 0
 			y_massa = 0
@@ -181,10 +97,12 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 			cx_novo = x_massa/numero_pts
 			cy_novo = y_massa/numero_pts
 			if (cx_novo<=1 or cx_novo>=w_frame-1 or cy_novo<=1 or cy_novo>(h_frame-1)):
-				PessoaSair(cur, pessoa_id, tempo_video)
-				#cur.execute("""DELETE * FROM 'PontoAtualInterno' WHERE Id = ?""", (ponto[0],))
+				#PessoaSair(cur, pessoa_id, tempo_video)
+				cur.execute("""DELETE * FROM 'PontoAtualInterno' WHERE Id = ?""", (ponto[0],))
+				
 			else:
-				mask = cv2.circle(mask,(int(cx_novo),int(cy_novo)),5,(255,0,0),-1)
+				mask = cv2.circle(mask,(int(cx_novo),int(cy_novo)),5,(255,255,0),-1)
+				mask = cv2.putText(mask, str(pessoa_id), (int(cx_novo),int(cy_novo)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
 
 				cur.execute("""SELECT * FROM 'Posicao' WHERE Pessoa_id = ? and Atual = 1""", (pessoa_id,))
 				pos_antiga = cur.fetchall()
@@ -197,56 +115,43 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 	cv2.imshow('posicoes',frame2)
 	return
 
-def Limpar_PontosPerdidos(cur, matriz_flow):
-	cur.execute("""SELECT * FROM 'Posicao' WHERE Atual =1""")
-	lista_pos = cur.fetchall()
-	for pos in lista_pos:
-		pessoa_id = pos[6]
-		x_pos = pos[1]
-		y_pos = pos[2]
-		largura_media = Largura_Media(x_pos, y_pos, cur)
-		altura_media = Altura_Media(x_pos, y_pos, cur)
-		cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE Pessoa_id=?""", (pessoa_id,))
-		lista_pontos = cur.fetchall()
-		for ponto in lista_pontos:
-			x_ponto=ponto[2]
-			y_ponto=ponto[3]
-			id_ponto = ponto[0]
-			dist_quad_max = largura_media*largura_media + altura_media*altura_media
-			dist_quad_x = (x_pos-x_ponto)*(x_pos-x_ponto)
-			dist_quad_y = (y_pos-y_ponto)*(y_pos-y_ponto)
-			if((dist_quad_y+dist_quad_x)>=dist_quad_max):
-				cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id=?""",(id_ponto,))
-	return
 
 
-def Limpar_PontosPerdidos2(cur, matriz_flow):
-	cur.execute("""SELECT * FROM 'Posicao' WHERE Atual =1""")
-	lista_pos = cur.fetchall()
-	for pos in lista_pos:
-		pessoa_id = pos[6]
-		x_pos = pos[1]
-		y_pos = pos[2]
-		largura_media = Largura_Media(x_pos, y_pos, cur)
-		altura_media = Altura_Media(x_pos, y_pos, cur)
+def Limpar_PontosPerdidos_new(cur, matriz_flow):
+	cur.execute("""SELECT * FROM 'Pessoa' WHERE Status ='in'""")
+	lista_pes = cur.fetchall()
+	for pes in lista_pes:
+		pessoa_id = pes[0]
+		print("pesid"+str(pessoa_id))
 		cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE Pessoa_id=?""", (pessoa_id,))
-		lista_pontos = cur.fetchall()
-		for ponto in lista_pontos:
-			x_ponto=ponto[2]
-			y_ponto=ponto[3]
-			id_ponto = ponto[0]
-			dist_quad_max = largura_media*largura_media + altura_media*altura_media
-			dist_quad_x = (x_pos-x_ponto)*(x_pos-x_ponto)
-			dist_quad_y = (y_pos-y_ponto)*(y_pos-y_ponto)
-			if((dist_quad_y+dist_quad_x)>=dist_quad_max):
-				for ponto_final in lista_pontos:
-					ponto_final_x = ponto_final[2]
-					ponto_final_y = ponto_final[3]
-					deslocamento_x = int(matriz_flow[int(ponto_final_y)][int(ponto_final_x)][0])
-					deslocamento_y = int(matriz_flow[int(ponto_final_y)][int(ponto_final_x)][1])
-					if (deslocamento_x==0 and deslocamento_y==0):
-						cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Id=?""",(ponto_final[0],))
+		lista_ptos = cur.fetchall()
+		lista_x = []
+		lista_y = []
+		if (len(lista_ptos)>0):
+			for pto in lista_ptos:
+				lista_x.append(pto[2])
+				lista_y.append(pto[3])
+			x_esquerda = min(lista_x)
+			x_direita = max(lista_x)
+			x_diferenca = x_direita - x_esquerda
+			x_centro = x_esquerda + x_diferenca/2
+
+
+			y_cima = min(lista_y)
+			y_baixo = max(lista_y)
+			y_diferenca = y_baixo - y_cima
+			y_centro = y_cima + y_diferenca/2
+
+
+			largura_media, altura_media = Medidas_Media(x_centro, y_centro, cur)
+
+			qnt_largura = x_diferenca/largura_media
+			qnt_altura = y_diferenca/altura_media
+
+			if(qnt_largura>1.2 or qnt_altura>1.2):
+				cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Pessoa_id=? AND Ultima_mov = 0""", (pessoa_id,))
 	return
+
 
 def Limpar_PtosAreasDescarte(cur, tempo_video):
 	cur.execute("""SELECT * FROM 'Local' WHERE Tipo ='ignorar'""")
@@ -256,13 +161,12 @@ def Limpar_PtosAreasDescarte(cur, tempo_video):
 		local_y = local[4]
 		local_x_max = local_x + local[5]
 		local_y_max = local_y + local[6]
-		cur.execute("""SELECT * FROM 'Posicao' WHERE Atual = 1 AND X>=? AND X<=? AND Y>=? AND Y<=?""", (local_x, local_x_max, local_y, local_y_max,))
-		lista_pontos_excluir = cur.fetchall()
-		for ponto in lista_pontos_excluir:
-			id_pessoa = ponto[6]
-			PessoaSair(cur, id_pessoa, tempo_video)
+		#cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X>=? AND X<=? AND Y>=? AND Y<=?""", (local_x, local_x_max, local_y, local_y_max,))
+		cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE X>=? AND X<=? AND Y>=? AND Y<=?""", (local_x, local_x_max, local_y, local_y_max,))
+		#lista_pontos_excluir = cur.fetchall()
+		#for ponto in lista_pontos_excluir:
+		#	id_pessoa = ponto[6]
+		#	PessoaSair(cur, id_pessoa, tempo_video)
 	return
-		#cur.execute("CREATE TABLE Local(Id INTEGER PRIMARY KEY AUTOINCREMENT, Nome INT, Tipo TEXT, X INT, Y INT, Width INT, Height INT)") #tipo = tracking, fila ou ignorar
-
 
 

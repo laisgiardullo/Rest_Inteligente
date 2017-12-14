@@ -52,12 +52,21 @@ def TotalMedidaFinal(cur):
     altura=altura/len(lista_medidas)
     return largura, altura
 
+def Dist_quad(cur, id_quad_sem, id_quad_com):
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE Id = ?""", (id_quad_sem,))
+    quad_sem_med = cur.fetchall()[0]
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE Id = ?""", (id_quad_com,))
+    quad_com_med = cur.fetchall()[0]
+    dist_x = (quad_sem_med[1] - quad_com_med[1])*(quad_sem_med[1] - quad_com_med[1])
+    dist_y = (quad_sem_med[2] - quad_com_med[2])*(quad_sem_med[2] - quad_com_med[2])
+    return (dist_x + dist_y)
 
 def Salvar_MedidaFinal(cur):
     cur.execute("""SELECT * FROM 'Quadrantes'""")
     lista_quadrantes = cur.fetchall()
     quadrantes_sem_medidas = []
     #para quadrantes que tem medidas
+    quadrantes_com_medidas = []
     for quadrante in lista_quadrantes:
         Quadranteid = quadrante[0]
         cur.execute("""SELECT * FROM 'MedidaParcial' WHERE Quadranteid = ?""", (Quadranteid,))
@@ -65,47 +74,35 @@ def Salvar_MedidaFinal(cur):
         if (len(lista_medidas)==0):
             quadrantes_sem_medidas.append(Quadranteid)
         else:
+            quadrantes_com_medidas.append(Quadranteid)
             largura, altura = Media_Medidas(lista_medidas)
             valores_input = (None, largura, altura, Quadranteid)
             cur.execute("""INSERT INTO MedidaFinal VALUES (?,?,?,?)""", valores_input)
     #para quadrantes que nao tem
-    for quad in quadrantes_sem_medidas:
-        largura = 0
-        altura = 0
-        cur.execute("""SELECT * FROM 'Quadrantes' WHERE Id = ?""", (quad,))
-        quadrante_atual = (cur.fetchall())[0]
-        #Quadrantes(Id INTEGER PRIMARY KEY AUTOINCREMENT, N_Quad_X INT, N_Quad_Y INT, X INT, Y INT, Width INT, Height INT, W_Pessoa INT, H_Pessoa INT)")
-        n_quad_y = quadrante_atual[4]
-        h = quadrante_atual[6]
-        
+    
+
+    ## achar quadrante mais proximo 
+    for id_quad_sem in quadrantes_sem_medidas:
+        distancia_menor = []
+        quadrante_mais_perto = []
+        for id_quad_com in quadrantes_com_medidas:
+            #print (id_quad_com)
+            distancia = Dist_quad(cur, id_quad_sem, id_quad_com)
+            if (len(distancia_menor) == 0):
+                distancia_menor.append(distancia)
+                quadrante_mais_perto.append(id_quad_com)
+            elif (distancia_menor[0]>distancia):
+                distancia_menor[0] = distancia
+                quadrante_mais_perto[0] = id_quad_com
         #testa na altura dele
-        cur.execute("""SELECT * FROM 'MedidaParcial' WHERE Y = ?""", (n_quad_y,))
-        lista_medidas_ny = cur.fetchall()
-        if (len(lista_medidas_ny)==0):
-            nao_achou = True
-        else:
-            nao_achou = False
-            largura, altura = Media_Medidas(lista_medidas_ny)
-            valores_input = (None, largura, altura, quad)
-            cur.execute("""INSERT INTO MedidaFinal VALUES (?,?,?,?)""", valores_input)
-        if (nao_achou):
-            cur.execute("""SELECT * FROM 'MedidaParcial'""")
-            lista_medidas_t = cur.fetchall()
-            if (len(lista_medidas_t)>0):
-                largura, altura = Media_Medidas(lista_medidas_t)
-            else:
-                largura = largura_padrao
-                altura = altura_padrao
-            valores_input = (None, largura, altura, quad)
-            cur.execute("""INSERT INTO MedidaFinal VALUES (?,?,?,?)""", valores_input)
-        # i=0
-        #ny_atual_baixo = n_quad_y + i
-        # while (nao_achou and (ny_atual_baixo<h_frame or ny_atual_cima>=0)):
-        #     ny_atual_baixo = n_quad_y + i
-
-
-        #     i+=1
+        cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid = ?""", (quadrante_mais_perto[0],))
+        obj_medida_final = cur.fetchall()[0]
+        largura = obj_medida_final[1]
+        altura = obj_medida_final[2]
+        valores_input = (None, largura, altura, id_quad_sem)
+        cur.execute("""INSERT INTO MedidaFinal VALUES (?,?,?,?)""", valores_input)
     return
+
 
 
 

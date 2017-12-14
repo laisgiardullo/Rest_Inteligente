@@ -48,6 +48,10 @@ def Aplicacao_Mascara(fgmask):
 
 def Qnt_Pessoas_Contorno (w, largura_media):
     pp = w//largura_media
+    resto = w/largura_media - pp
+
+    if (resto>0.7):
+        pp+=1
     if (pp==0):
         pp=1
     return (pp)
@@ -58,40 +62,6 @@ def Atualizar_Retangulo(x, y, h, new_width, it):
     cy = y + (h/2) #cy = o centro do retangulo da pessoa, em y
     return (new_x, cx, cy)
 
-def Salvar_PontoAtualInterno(new_width, h, cnt, pid, new_x, y, cur):
-    lista_objetos = []
-    for i in range (new_width):
-        for j in range (h):
-            no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
-            if (no_contorno>=0):
-                x_salvar = new_x+i
-                y_salvar = y+j
-                if (no_contorno==0):
-                    lista_objetos.append((None, 1, x_salvar,y_salvar, pid))
-                if (no_contorno>0):
-                    lista_objetos.append((None, 0, x_salvar,y_salvar, pid))
-                j+=1
-                i+=1
-    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
-    return
 
-def Adicionar_Pontos_Contorno(new_width, h, cnt, pessoax, new_x, y ,cur):
-    lista_objetos = []
-    for i in range (new_width):
-        for j in range (h):
-            no_contorno = cv2.pointPolygonTest(cnt, (new_x+i, y+j), False)
-            x_salvar = new_x+i
-            y_salvar = y+j
-            if (no_contorno>=0):
-                cur.execute("""SELECT * FROM 'PontoAtualInterno' WHERE X = ? AND Y=? AND Pessoa_id=?""", (x_salvar, y_salvar, pessoax,))
-                lista_ponto = cur.fetchall()
-                if(len(lista_ponto)==0):
-                    if (no_contorno==0):
-                        lista_objetos.append((None, 1, x_salvar,y_salvar, pessoax))
-                    if (no_contorno>0):
-                        lista_objetos.append((None, 0, x_salvar,y_salvar, pessoax))
-            j+=3
-            i+=3
-    cur.executemany("INSERT INTO PontoAtualInterno VALUES(?,?,?,?,?)", lista_objetos)
-    return
+
                     

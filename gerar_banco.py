@@ -20,7 +20,7 @@ with con:
     cur.execute("CREATE TABLE Pessoa(Id INT, Status TEXT, Width INT, Instante_Inicial INT, Instante_Saida INT)")
     cur.execute("CREATE TABLE Posicao(Id INTEGER PRIMARY KEY AUTOINCREMENT, X REAL, Y REAL, Instante_Inicial INT, Instante_Final INT, Atual INT, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
     #cur.execute("CREATE TABLE Posicao(Id INTEGER PRIMARY KEY AUTOINCREMENT,Pixel_id INT, FOREIGN KEY(Pixel_id) REFERENCES Pixel(Id) , Instante_Inicial INT, Instante_Final INT, Atual INT, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
-    cur.execute("CREATE TABLE PontoAtualInterno(Id INTEGER PRIMARY KEY AUTOINCREMENT,EhContorno INT, X REAL, Y REAL, Pessoa_id INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
+    cur.execute("CREATE TABLE PontoAtualInterno(Id INTEGER PRIMARY KEY AUTOINCREMENT,EhContorno INT, X REAL, Y REAL, Pessoa_id INT, Ultima_mov INT, FOREIGN KEY(Pessoa_id) REFERENCES Pessoa(Id))")
 
     #Calibracao do Usuario
     cur.execute("CREATE TABLE MedidaParcial(Id INTEGER PRIMARY KEY AUTOINCREMENT, X INT, Y INT, Width INT, Height INT, Quadranteid INT, FOREIGN KEY(Quadranteid) REFERENCES Quadrante(Id))")

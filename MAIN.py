@@ -19,14 +19,14 @@ from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture(r'videos\armarios_biblio.mov') #Open video file
-#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
 #cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Chinese_Rest.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\IMG_2409.mov')
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
-cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Refeitorio_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
 #cap.set(4,90) #set height (4) para 90
@@ -93,7 +93,10 @@ if(calibracao==1):
 
 largurafinal_geral,alturafinal_geral  = TotalMedidaFinal(cur)
 
-areaTH = (largurafinal_geral*alturafinal_geral)/2
+areaTH = (largurafinal_geral*alturafinal_geral)/3
+
+con.commit()
+con.close()
 
 if (tipo == 1):
     while(cap.isOpened()):
@@ -191,6 +194,8 @@ elif (tipo ==5):
     mask = np.zeros_like(old_frame)
     lista = []
     while(cap.isOpened()):
+        con = lite.connect(r'GUI\video_inteligente_gui\db.sqlite3')
+        cur = con.cursor()
         now = datetime.datetime.now()
         now_id = Salvar_DataHora(now, cur)
 
@@ -210,7 +215,7 @@ elif (tipo ==5):
                 print("ptos internos")
                 Limpar_PtosAreasDescarte(cur, tempo_video)
                 print ("descarte")
-                Limpar_PontosPerdidos2(cur, matriz_flow)
+                Limpar_PontosPerdidos_new(cur, matriz_flow)
                 print("ptos perdidos")
                 #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
                 Atualizar_PosicoesFlow(cur, tempo_video, frame)
@@ -218,13 +223,17 @@ elif (tipo ==5):
 
                 SalvarNumPessoasTotal(now_id, cur)
                 #SalvarNumPessoasLocal(now_id, cur)
-            cv2.imshow('Frame',frame2)
+            #cv2.imshow('Frame',frame2)
         nframe +=1
+        con.commit()
+        con.close()
         
         
         #Abort and exit with 'Q' or ESC
         k = cv2.waitKey(30) & 0xff
         if k == 27:
+            con = lite.connect(r'GUI\video_inteligente_gui\db.sqlite3')
+            cur = con.cursor()
             Todas_Pessoas_Sairem(cur, tempo_video)
             con.commit()
             con.close()

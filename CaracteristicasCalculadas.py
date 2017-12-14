@@ -21,7 +21,18 @@ def Largura_Media(x, y, cur):
     cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
     medida = (cur.fetchall())[0]
     largura_media = medida[1]
+
     return (largura_media)
+
+def Medidas_Media(x, y, cur):
+    cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
+    quadrante = cur.fetchall()
+    Quadranteid = quadrante[0][0]
+    cur.execute("""SELECT * FROM 'MedidaFinal' WHERE Quadranteid=?""", (Quadranteid,))
+    medida = (cur.fetchall())[0]
+    largura_media = medida[1]
+    altura_media = medida[2]
+    return (largura_media, altura_media)
 
 def Altura_Media(x, y, cur):
     cur.execute("""SELECT * FROM 'Quadrantes' WHERE (X<=? AND X+Width>=? AND Y<=? AND Y+Height>=?)""", (x, x, y, y,))
