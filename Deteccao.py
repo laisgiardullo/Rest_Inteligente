@@ -156,9 +156,9 @@ def Comparar_e_Salvar_Novos2(contours1, img, areaTH, pid, num_frame, tempo_video
         x,y,w,h = cv2.boundingRect(cnt) # x e y: top left
 
         largura_media, altura_media = Medidas_Media(x+w/2,y+h/2, cur)
-        areaTH = largura_media*altura_media/3
-        limitex = largura_media*largura_media
-        limitey = altura_media*altura_media
+        areaTH = largura_media*altura_media/2
+        limitex = largura_media*largura_media*1.2
+        limitey = altura_media*altura_media*1.5
         if (area>areaTH):
             pp = Qnt_Pessoas_Contorno(w, largura_media)
             new_width = w/pp #calcular a nova largura de somente 1 pessoa

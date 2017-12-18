@@ -53,10 +53,14 @@ def Atualizar_PontosAtuaisInternos(matriz_flow, cur, img, tempo_video):
 		x_ant = ponto[2] #x fica na posicao 2 do objeto
 		y_ant = ponto[3]
 		pessoa_id = ponto[4]
+		ultima_mov = ponto[5]
 
 		deslocamento_x = matriz_flow[int(y_ant)][int(x_ant)][0]
 		deslocamento_y = matriz_flow[int(y_ant)][int(x_ant)][1]
-		deslocamento_total = int(deslocamento_x) + int (deslocamento_y)
+		if (ultima_mov>0):
+			deslocamento_total = int((abs(deslocamento_x) + abs(deslocamento_y))) + ultima_mov
+		else:
+			deslocamento_total = int((abs(deslocamento_x) + abs(deslocamento_y)))
 
 		x_prox = x_ant + deslocamento_x
 		y_prox = y_ant + deslocamento_y
@@ -86,8 +90,8 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 		#print("listapts"+str(lista_pontos))
 		numero_pts = len(lista_pontos)
 		if (len(lista_pontos)==0):
-			#PessoaSair(cur, pessoa_id, tempo_video)
-			pass
+			PessoaSair(cur, pessoa_id, tempo_video)
+			#pass
 		else:
 			x_massa = 0
 			y_massa = 0
@@ -102,7 +106,8 @@ def Atualizar_PosicoesFlow(cur, tempo_video, img):
 				
 			else:
 				mask = cv2.circle(mask,(int(cx_novo),int(cy_novo)),5,(255,255,0),-1)
-				mask = cv2.putText(mask, str(pessoa_id), (int(cx_novo),int(cy_novo)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
+				if (imprimir_id == True):
+					mask = cv2.putText(mask, str(pessoa_id), (int(cx_novo),int(cy_novo)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0,255,0))
 
 				cur.execute("""SELECT * FROM 'Posicao' WHERE Pessoa_id = ? and Atual = 1""", (pessoa_id,))
 				pos_antiga = cur.fetchall()
@@ -148,8 +153,9 @@ def Limpar_PontosPerdidos_new(cur, matriz_flow):
 			qnt_largura = x_diferenca/largura_media
 			qnt_altura = y_diferenca/altura_media
 
-			if(qnt_largura>1.2 or qnt_altura>1.2):
+			if(qnt_largura>2 or qnt_altura>2):
 				cur.execute("""DELETE FROM 'PontoAtualInterno' WHERE Pessoa_id=? AND Ultima_mov = 0""", (pessoa_id,))
+			cur.execute("""UPDATE PontoAtualInterno SET Ultima_mov = ? WHERE Pessoa_id=?""", (None, pessoa_id))
 	return
 
 

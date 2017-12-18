@@ -8,5 +8,7 @@ raiz_n_quad = 4 #raiz do numero de quadrantes considerados (valor correspondente
 largura_padrao = 31
 altura_padrao = 62
 
+imprimir_id = False
+
 #2 dedos e termina em 3 sendo que total eh 8
 #20 pessoas e termina em 10

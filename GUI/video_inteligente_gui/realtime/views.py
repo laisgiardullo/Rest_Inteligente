@@ -59,7 +59,7 @@ def index(request):
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
 	try:
 		total_pessoas_fila = len(list(set(lista_pessoas_ids)))
-		tempo_medio = int((tempo/total_pessoas_fila)/100)
+		tempo_medio = int((tempo/total_pessoas_fila)/1000)
 	except:
 		total_pessoas_fila = 0
 		tempo_medio = 0
@@ -99,7 +99,7 @@ def home_admin(request):
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
 	total_pessoas_fila = len(list(set(lista_pessoas_ids)))
 	try:
-		tempo_medio = int((tempo/total_pessoas_fila)/100)
+		tempo_medio = int((tempo/total_pessoas_fila)/1000)
 	except:
 		tempo_medio = 0
 	tempo_rest = 0
@@ -109,7 +109,7 @@ def home_admin(request):
 			lista_pessoas_ids_rest.append(posicao_total_rest.pessoa_id)
 	try: 
 		total_pessoas_rest = len(list(set(lista_pessoas_ids_rest)))
-		tempo_medio_rest = int((tempo_rest/total_pessoas_rest)/100)
+		tempo_medio_rest = int((tempo_rest/total_pessoas_rest)/1000)
 	except:
 		total_pessoas_rest = 0
 		tempo_medio_rest = 0
@@ -161,7 +161,7 @@ def historico_admin(request):
 			lista_pessoas_ids.append(posicao_total.pessoa_id)
 	try:
 		total_pessoas_fila = len(list(set(lista_pessoas_ids)))
-		tempo_medio = int((tempo/total_pessoas_fila)/100)
+		tempo_medio = int((tempo/total_pessoas_fila)/1000)
 	except:
 		total_pessoas_fila = 0
 		tempo_medio = 0

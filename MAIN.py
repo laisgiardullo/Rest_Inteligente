@@ -19,7 +19,7 @@ from desenhar import *
 
 #cap = cv2.VideoCapture('videos\Eletrica_Ent.mov') #Open video file
 #cap = cv2.VideoCapture(r'videos\armarios_biblio.mov') #Open video file
-cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
+#cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\TownCentreXVID.avi') #Open video file
 #cap = cv2.VideoCapture('videos\VISOR1.avi') #Open video file
 #cap = cv2.VideoCapture('videos\Rest_Israel.mp4') #Open video file
@@ -30,6 +30,12 @@ cap = cv2.VideoCapture('videos\Fila_Camera1.mp4') #Open video file
 #cap = cv2.VideoCapture('videos\Estavel.mp4') #Open video file
 #cap.set(3,160) #set width (3) para 160
 #cap.set(4,90) #set height (4) para 90
+
+cap = cv2.VideoCapture('videos\eletrica') #Open video file
+
+
+#cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(1)
 
 
 persons = []
@@ -65,7 +71,8 @@ if(limpar_tabela==1):
 #areaTH = input("Area Minima Pessoa")
 #tipo = input("Digite:\n 1 para seguir (metodo 1) \n 2 para optical flow\n 3 para cascade \n 4 para metodo 1 manual")
 tipo = 5
-salto_Opt_Flow = input("Digite de quantos em quantos quadros voce deseja fazer o optical flow")
+#salto_Opt_Flow = input("Digite de quantos em quantos quadros voce deseja fazer o optical flow")
+salto_Opt_Flow = 1
 
 Inicializar_Quadrantes(cur)
 
@@ -215,7 +222,8 @@ elif (tipo ==5):
                 print("ptos internos")
                 Limpar_PtosAreasDescarte(cur, tempo_video)
                 print ("descarte")
-                Limpar_PontosPerdidos_new(cur, matriz_flow)
+                if (nframe%3==0):
+                    Limpar_PontosPerdidos_new(cur, matriz_flow)
                 print("ptos perdidos")
                 #Atualizar_PontosAtuaisInternos2(matriz_flow, cur, frame)
                 Atualizar_PosicoesFlow(cur, tempo_video, frame)
